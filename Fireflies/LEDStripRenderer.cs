@@ -18,17 +18,36 @@ namespace Fireflies {
         int ledCount;
         private Ellipse[] visuals;
         private Color[] colors;
+        private IOrchestrator orchestrator;
 
         public LEDStripRenderer() {
             ledCount = 30;
             visuals = new Ellipse[ledCount];
             colors = new Color[ledCount];
+            orchestrator = new Orchestrators.RandomColor();
 
             initializeColorsTo(Color.FromRgb(0, 255, 0));
 
             createVisuals();
             updateVisuals();
             addVisualsAsChildren();
+
+            Loaded += (sender, e) => {
+                CompositionTarget.Rendering += UpdateColor;
+            };
+
+            Unloaded += (sender, e) => {
+                CompositionTarget.Rendering -= UpdateColor;
+            };
+        }
+
+        // TODO: Only do work when the rendering time changes
+        private void UpdateColor(object sender, EventArgs e) {
+            var renderEvent = (RenderingEventArgs)e;
+            var frameTime = renderEvent.RenderingTime;
+
+            orchestrator.Update(frameTime, colors);
+            updateVisuals();
         }
 
         private void initializeColorsTo(Color color) {
@@ -42,12 +61,13 @@ namespace Fireflies {
                 visuals[i] = new Ellipse();
                 visuals[i].Width = 10;
                 visuals[i].Height = 10;
+                visuals[i].Fill = new SolidColorBrush(colors[i]);
             }
         }
 
         private void updateVisuals() {
             for (int i = 0; i < ledCount; i++) {
-                visuals[i].Fill = new SolidColorBrush(colors[i]);
+                ((SolidColorBrush)visuals[i].Fill).Color = colors[i];
             }
         }
 
