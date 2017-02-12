@@ -28,10 +28,10 @@ namespace Fireflies {
         private Label fpsLabel = new Label();
 
         public LEDStripRenderer() {
-            ledCount = 30;
+            ledCount = 50;
             visuals = new Ellipse[ledCount];
             colors = new Color[ledCount];
-            orchestrator = new Orchestrators.FadeBlender(ledCount, new Orchestrators.SlidingColor(Colors.White));
+            orchestrator = new Orchestrators.SlidingColor(Colors.Aquamarine);
 
             initializeColorsTo(Colors.Black);
 
@@ -112,7 +112,7 @@ namespace Fireflies {
         }
 
         private Geometry getRectangleGeometry(Size size) {
-            double padding = 20;
+            double padding = 50;
 
             return new RectangleGeometry(
                 new Rect(

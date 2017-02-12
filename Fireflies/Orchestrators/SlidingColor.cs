@@ -8,40 +8,49 @@ using System.Windows.Media;
 namespace Fireflies.Orchestrators {
     class SlidingColor : IOrchestrator {
         private Color color;
-        private TimeSpan wrapAroundTime = new TimeSpan(0, 0, 5);
+        private TimeSpan wrapAroundTime = new TimeSpan(0, 0, 3);
 
-        private float fadeFactor = 0.3f;
-        private TimeSpan fadeTime = new TimeSpan(0, 0, 2);
-
-        private Color trailColor = Colors.Aquamarine;
+        private EasingFunction easingFunction = (new Easing.Exponential(1.5)).EaseInOut;
+        private float trailLength = 10;
+        private float forwardTrailLength = 1;
 
         public SlidingColor(Color color) {
             this.color = color;
         }
 
         public void Update(Color[] leds, TimeSpan totalTime, TimeSpan frameTime) {
-            double progress = (totalTime.Ticks % wrapAroundTime.Ticks) / (double)wrapAroundTime.Ticks;
-            int currentLed = (int)(progress * leds.Length);
-
-            double fadeProgress = frameTime.Ticks / (double)fadeTime.Ticks;
-            double fadeFactorNow = Math.Pow(fadeFactor, fadeProgress);
-
+            float progress = (float)easingFunction((totalTime.Ticks % wrapAroundTime.Ticks) / (double)wrapAroundTime.Ticks),
+                  position = progress * leds.Length;
+            
             for (int i = 0; i < leds.Length; i++) {
-                // leds[i].R = (byte)Math.Max(leds[i].R * fadeFactorNow, 0);
-                // leds[i].G = (byte)Math.Max(leds[i].G * fadeFactorNow, 0);
-                // leds[i].B = (byte)Math.Max(leds[i].B * fadeFactorNow, 0);
-                leds[i] = Colors.Black;
+                float forwardIntensity = Math.Max(trailLength - forwardDistance(i, position, leds.Length), 0) / trailLength,
+                      backwardIntensity = Math.Max(forwardTrailLength - forwardDistance(position, i, leds.Length), 0) / forwardTrailLength,
+                      intensity = forwardIntensity + backwardIntensity;
+
+                leds[i] = crossfade(Colors.Black, Colors.Aquamarine, intensity);
+            }
+        }
+        
+        private Color crossfade(Color a, Color b, float factor) {
+            if (factor < 0) {
+                factor = 0;
+            } else if (factor > 1) {
+                factor = 1;
             }
 
-            // leds[wraparound(currentLed - 1, leds.Length)] = trailColor;
-            leds[currentLed] = color;
+            return new Color() {
+                R = (byte)(a.R * (1 - factor) + b.R * factor),
+                G = (byte)(a.G * (1 - factor) + b.G * factor),
+                B = (byte)(a.B * (1 - factor) + b.B * factor),
+                A = 255
+            };
         }
 
-        private int wraparound(int index, int max) {
-            if (index >= 0) {
-                return index % max;
+        private float forwardDistance(float a, float b, int length) {
+            if (a < b) {
+                return b - a;
             } else {
-                return index % max + max;
+                return b + length - a;
             }
         }
     }
