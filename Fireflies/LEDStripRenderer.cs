@@ -23,16 +23,17 @@ namespace Fireflies {
 
         private TimeSpan elapsedTime = new TimeSpan(0);
 
-        private double currentFps = 0;
+        private bool limitFps = false;
+        private double currentFps = 0, maxFps = 20;
         private Label fpsLabel = new Label();
 
         public LEDStripRenderer() {
             ledCount = 30;
             visuals = new Ellipse[ledCount];
             colors = new Color[ledCount];
-            orchestrator = new Orchestrators.RandomColor();
+            orchestrator = new Orchestrators.SlidingColor(Colors.White);
 
-            initializeColorsTo(Color.FromRgb(0, 255, 0));
+            initializeColorsTo(Colors.Black);
 
             createVisuals();
             updateVisuals();
@@ -40,6 +41,7 @@ namespace Fireflies {
 
             fpsLabel.Content = "0";
             fpsLabel.FontSize = 20;
+            fpsLabel.Foreground = new SolidColorBrush(Colors.White);
 
             Children.Add(fpsLabel);
 
@@ -60,12 +62,16 @@ namespace Fireflies {
                 return;
             }
 
-            elapsedTime = renderEvent.RenderingTime;
-            
+            if (limitFps && frameTime.TotalSeconds < 1 / maxFps) {
+                return;
+            }
+
             currentFps = currentFps * 0.95 + (1 / frameTime.TotalSeconds) * 0.05;
             fpsLabel.Content = ((int)currentFps).ToString();
 
-            orchestrator.Update(frameTime, colors);
+            elapsedTime = renderEvent.RenderingTime;
+
+            orchestrator.Update(colors, elapsedTime, frameTime);
             updateVisuals();
         }
 

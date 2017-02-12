@@ -7,6 +7,6 @@
         mc:Ignorable="d"
         Title="Fireflies" Height="350" Width="525">
     <Grid>
-        <local:LEDStripRenderer />
+        <local:LEDStripRenderer Background="Black" />
     </Grid>
 </Window>

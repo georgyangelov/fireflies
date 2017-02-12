@@ -7,6 +7,6 @@ using System.Windows.Media;
 
 namespace Fireflies {
     interface IOrchestrator {
-        void Update(TimeSpan frameTime, Color[] leds);
+        void Update(Color[] leds, TimeSpan totalTime, TimeSpan frameTime);
     }
 }

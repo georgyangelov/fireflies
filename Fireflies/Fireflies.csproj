@@ -75,6 +75,7 @@
   <ItemGroup>
     <Compile Include="IOrchestrator.cs" />
     <Compile Include="Orchestrators\RandomColor.cs" />
+    <Compile Include="Orchestrators\SlidingColor.cs" />
     <Compile Include="Orchestrators\StaticColor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
