@@ -78,12 +78,6 @@ namespace Fireflies {
         }
 
         protected override Size ArrangeOverride(Size finalSize) {
-            //int pos = 0;
-            //foreach (UIElement child in Children) {
-            //    child.Arrange(new Rect(new Point(pos, 10), new Size(10, 10)));
-            //    pos += 10;
-            //}
-
             int childrenCount = Children.Count;
 
             var geometry = getCircleGeometry(finalSize).GetFlattenedPathGeometry();
