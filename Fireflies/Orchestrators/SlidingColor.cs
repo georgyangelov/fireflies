@@ -27,12 +27,13 @@ namespace Fireflies.Orchestrators {
             double fadeFactorNow = Math.Pow(fadeFactor, fadeProgress);
 
             for (int i = 0; i < leds.Length; i++) {
-                leds[i].R = (byte)(leds[i].R * fadeFactorNow);
-                leds[i].G = (byte)(leds[i].G * fadeFactorNow);
-                leds[i].B = (byte)(leds[i].B * fadeFactorNow);
+                // leds[i].R = (byte)Math.Max(leds[i].R * fadeFactorNow, 0);
+                // leds[i].G = (byte)Math.Max(leds[i].G * fadeFactorNow, 0);
+                // leds[i].B = (byte)Math.Max(leds[i].B * fadeFactorNow, 0);
+                leds[i] = Colors.Black;
             }
 
-            leds[wraparound(currentLed - 1, leds.Length)] = trailColor;
+            // leds[wraparound(currentLed - 1, leds.Length)] = trailColor;
             leds[currentLed] = color;
         }
 

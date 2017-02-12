@@ -31,7 +31,7 @@ namespace Fireflies {
             ledCount = 30;
             visuals = new Ellipse[ledCount];
             colors = new Color[ledCount];
-            orchestrator = new Orchestrators.SlidingColor(Colors.White);
+            orchestrator = new Orchestrators.FadeBlender(ledCount, new Orchestrators.SlidingColor(Colors.White));
 
             initializeColorsTo(Colors.Black);
 
