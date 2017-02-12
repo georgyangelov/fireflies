@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Fireflies.Easing {
-    class Exponential {
+    class Polynomial {
         private double exponent;
 
-        public Exponential(double exponent) {
+        public Polynomial(double exponent) {
             this.exponent = exponent;
         }
 

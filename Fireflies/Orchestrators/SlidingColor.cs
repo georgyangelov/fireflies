@@ -8,11 +8,15 @@ using System.Windows.Media;
 namespace Fireflies.Orchestrators {
     class SlidingColor : IOrchestrator {
         private Color color;
-        private TimeSpan wrapAroundTime = new TimeSpan(0, 0, 3);
+        private TimeSpan wrapAroundTime = new TimeSpan(0, 0, 0, 0, 2500);
 
-        private EasingFunction easingFunction = (new Easing.Exponential(1.5)).EaseInOut;
-        private float trailLength = 10;
-        private float forwardTrailLength = 1;
+        private EasingFunction easingFunction = (new Easing.Polynomial(1.4)).EaseInOut;
+        // private EasingFunction easingFunction = Easing.Sine.EaseIn;
+        private float trailLength = 40;
+        private float forwardTrailLength = 5;
+
+        private Color lightColor = Colors.Yellow;
+        private Color darkColor = Colors.Red;
 
         public SlidingColor(Color color) {
             this.color = color;
@@ -27,7 +31,7 @@ namespace Fireflies.Orchestrators {
                       backwardIntensity = Math.Max(forwardTrailLength - forwardDistance(position, i, leds.Length), 0) / forwardTrailLength,
                       intensity = forwardIntensity + backwardIntensity;
 
-                leds[i] = crossfade(Colors.Black, Colors.Aquamarine, intensity);
+                leds[i] = crossfade(darkColor, lightColor, intensity);
             }
         }
         

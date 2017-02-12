@@ -28,7 +28,7 @@ namespace Fireflies {
         private Label fpsLabel = new Label();
 
         public LEDStripRenderer() {
-            ledCount = 50;
+            ledCount = 144;
             visuals = new Ellipse[ledCount];
             colors = new Color[ledCount];
             orchestrator = new Orchestrators.SlidingColor(Colors.Aquamarine);
@@ -123,7 +123,7 @@ namespace Fireflies {
         }
 
         protected override Size ArrangeOverride(Size finalSize) {
-            var geometry = getCircleGeometry(finalSize).GetFlattenedPathGeometry();
+            var geometry = getRectangleGeometry(finalSize).GetFlattenedPathGeometry();
             Point positionPoint;
             Point tangentVector;
 
