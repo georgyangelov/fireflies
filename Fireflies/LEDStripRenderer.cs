@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,11 @@ namespace Fireflies {
         private Color[] colors;
         private IOrchestrator orchestrator;
 
+        private TimeSpan elapsedTime = new TimeSpan(0);
+
+        private double currentFps = 0;
+        private Label fpsLabel = new Label();
+
         public LEDStripRenderer() {
             ledCount = 30;
             visuals = new Ellipse[ledCount];
@@ -32,6 +38,11 @@ namespace Fireflies {
             updateVisuals();
             addVisualsAsChildren();
 
+            fpsLabel.Content = "0";
+            fpsLabel.FontSize = 20;
+
+            Children.Add(fpsLabel);
+
             Loaded += (sender, e) => {
                 CompositionTarget.Rendering += UpdateColor;
             };
@@ -40,11 +51,19 @@ namespace Fireflies {
                 CompositionTarget.Rendering -= UpdateColor;
             };
         }
-
-        // TODO: Only do work when the rendering time changes
+        
         private void UpdateColor(object sender, EventArgs e) {
             var renderEvent = (RenderingEventArgs)e;
-            var frameTime = renderEvent.RenderingTime;
+            var frameTime = renderEvent.RenderingTime - elapsedTime;
+
+            if (frameTime.Ticks <= 0) {
+                return;
+            }
+
+            elapsedTime = renderEvent.RenderingTime;
+            
+            currentFps = currentFps * 0.95 + (1 / frameTime.TotalSeconds) * 0.05;
+            fpsLabel.Content = ((int)currentFps).ToString();
 
             orchestrator.Update(frameTime, colors);
             updateVisuals();
@@ -98,21 +117,22 @@ namespace Fireflies {
         }
 
         protected override Size ArrangeOverride(Size finalSize) {
-            int childrenCount = Children.Count;
-
             var geometry = getCircleGeometry(finalSize).GetFlattenedPathGeometry();
             Point positionPoint;
             Point tangentVector;
 
-            for (int i = 0; i < childrenCount; i++) {
-                UIElement child = Children[i];
+            for (int i = 0; i < visuals.Length; i++) {
+                UIElement child = visuals[i];
 
-                geometry.GetPointAtFractionLength(i / (float)childrenCount, out positionPoint, out tangentVector);
+                // TODO: Breaks when the geometry is a point
+                geometry.GetPointAtFractionLength(i / (float)visuals.Length, out positionPoint, out tangentVector);
 
                 child.Arrange(
                     new Rect(positionPoint, new Size(10, 10))
                 );
             }
+
+            fpsLabel.Arrange(new Rect(0, 0, 40, 40));
 
             return finalSize;
         }
