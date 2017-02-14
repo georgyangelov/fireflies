@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Fireflies.Easing {
     class Linear {
-        public double EaseIn(double fraction) {
+        static public double EaseIn(double fraction) {
             return fraction;
         }
 
-        public double EaseInOut(double fraction) {
+        static public double EaseInOut(double fraction) {
             return fraction;
         }
 
-        public double EaseOut(double fraction) {
+        static public double EaseOut(double fraction) {
             return fraction;
         }
     }
