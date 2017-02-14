@@ -10,13 +10,14 @@ namespace Fireflies.Orchestrators {
         private Color color;
         private TimeSpan wrapAroundTime = new TimeSpan(0, 0, 0, 0, 2500);
 
-        private EasingFunction easingFunction = (new Easing.Polynomial(1.4)).EaseInOut;
-        // private EasingFunction easingFunction = Easing.Sine.EaseIn;
-        private float trailLength = 40;
-        private float forwardTrailLength = 5;
+        // private EasingFunction easingFunction = Easing.Linear.EaseInOut;
+        private EasingFunction easingFunction = (new Easing.Polynomial(1.3)).EaseInOut;
+        // private EasingFunction easingFunction = Easing.Sine.EaseInOut;
+        private float trailLength = 10;
+        private float forwardTrailLength = 10;
 
         private Color lightColor = Colors.Yellow;
-        private Color darkColor = Colors.Red;
+        private Color darkColor = Colors.DarkRed;
 
         public SlidingColor(Color color) {
             this.color = color;
