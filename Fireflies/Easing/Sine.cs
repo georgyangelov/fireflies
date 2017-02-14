@@ -15,7 +15,7 @@ namespace Fireflies.Easing {
         }
 
         static public double EaseInOut(double x) {
-            return 1 - Math.Cos(x * Math.PI);
+            return (1 - Math.Cos(x * Math.PI)) / 2;
         }
     }
 }
