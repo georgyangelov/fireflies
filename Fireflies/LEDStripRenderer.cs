@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 
 namespace Fireflies {
     public class LEDStripRenderer : Panel {
-        int ledCount;
+        int ledCount, ledsPerPixel;
         private Ellipse[] visuals;
         private Color[] colors;
         private IOrchestrator orchestrator;
@@ -28,8 +28,9 @@ namespace Fireflies {
         private Label fpsLabel = new Label();
 
         public LEDStripRenderer() {
-            ledCount = 144;
-            visuals = new Ellipse[ledCount];
+            ledCount = 90;
+            ledsPerPixel = 1;
+            visuals = new Ellipse[ledCount * ledsPerPixel];
             colors = new Color[ledCount];
             orchestrator = new Orchestrators.SlidingColor(Colors.Aquamarine);
 
@@ -82,17 +83,19 @@ namespace Fireflies {
         }
 
         private void createVisuals() {
-            for (int i = 0; i < ledCount; i++) {
+            for (int i = 0; i < visuals.Length; i++) {
                 visuals[i] = new Ellipse();
                 visuals[i].Width = 10;
                 visuals[i].Height = 10;
-                visuals[i].Fill = new SolidColorBrush(colors[i]);
+                visuals[i].Fill = new SolidColorBrush(Colors.Black);
             }
         }
 
         private void updateVisuals() {
             for (int i = 0; i < ledCount; i++) {
-                ((SolidColorBrush)visuals[i].Fill).Color = colors[i];
+                for (int j = 0; j < ledsPerPixel; j++) {
+                    ((SolidColorBrush)visuals[i * ledsPerPixel + j].Fill).Color = colors[i];
+                }
             }
         }
 
