@@ -23,6 +23,13 @@ namespace Fireflies
         public MainWindow()
         {
             InitializeComponent();
+
+            var capturer = new Capture.ScreenCapturer(0, 0);
+
+            var captureTask = new Task(() => capturer.Capture(), TaskCreationOptions.LongRunning);
+            captureTask.Start();
+
+            capturePreview.Capturer = capturer;
         }
     }
 }

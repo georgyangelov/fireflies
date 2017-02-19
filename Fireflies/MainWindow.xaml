@@ -7,6 +7,14 @@
         mc:Ignorable="d"
         Title="Fireflies" Height="358" Width="515">
     <Grid>
-        <local:LEDStripRenderer Background="Black" />
+        <local:LEDStripRenderer Background="Black"></local:LEDStripRenderer>
+        
+        <local:ScreenCapturePreview x:Name="capturePreview" HorizontalAlignment="Left" Height="200" VerticalAlignment="Top" Width="377" Margin="70,70,0,0" />
+
+        <!-- <Canvas HorizontalAlignment="Center" Height="182" VerticalAlignment="Center" Width="363" Margin="77,78,67,67">
+            <Canvas.Background>
+                <ImageBrush
+            </Canvas.Background>
+        </Canvas> -->
     </Grid>
 </Window>
