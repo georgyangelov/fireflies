@@ -100,6 +100,7 @@ namespace Fireflies {
         }
 
         private DrawingVisual visual = new DrawingVisual();
+        
         public FrameClock FrameClock { get; set; }
 
         public ScreenCapturePreview() {
@@ -107,11 +108,15 @@ namespace Fireflies {
             AddLogicalChild(visual);
 
             Loaded += (sender, e) => {
-                FrameClock.OnFrame += Render;
+                if (FrameClock != null) {
+                    FrameClock.OnFrame += Render;
+                }
             };
 
             Unloaded += (sender, e) => {
-                FrameClock.OnFrame -= Render;
+                if (FrameClock != null) {
+                    FrameClock.OnFrame -= Render;
+                }
             };
         }
 

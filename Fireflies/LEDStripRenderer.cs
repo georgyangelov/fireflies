@@ -20,8 +20,6 @@ namespace Fireflies {
         private Ellipse[] visuals;
         private Color[] colors;
         private IOrchestrator orchestrator;
-        
-        private Label fpsLabel = new Label();
 
         public FrameClock FrameClock { get; set; }
 
@@ -48,26 +46,22 @@ namespace Fireflies {
             updateVisuals();
             addVisualsAsChildren();
 
-            fpsLabel.Content = "0";
-            fpsLabel.FontSize = 20;
-            fpsLabel.Foreground = new SolidColorBrush(Colors.White);
-
-            Children.Add(fpsLabel);
-
             Loaded += (sender, e) => {
-                FrameClock.OnFrame += UpdateColor;
+                if (FrameClock != null) {
+                    FrameClock.OnFrame += UpdateColor;
+                }
             };
 
             Unloaded += (sender, e) => {
-                FrameClock.OnFrame -= UpdateColor;
+                if (FrameClock != null) {
+                    FrameClock.OnFrame -= UpdateColor;
+                }
             };
         }
         
         private void UpdateColor(FrameInfo frame) {
             orchestrator.Update(colors, frame);
             updateVisuals();
-
-            fpsLabel.Content = (int)FrameClock.CurrentFPS;
         }
 
         private void initializeColorsTo(Color color) {
@@ -134,8 +128,6 @@ namespace Fireflies {
                     new Rect(positionPoint, new Size(10, 10))
                 );
             }
-
-            fpsLabel.Arrange(new Rect(0, 0, 40, 40));
 
             return finalSize;
         }

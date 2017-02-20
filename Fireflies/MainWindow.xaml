@@ -6,8 +6,15 @@
         xmlns:local="clr-namespace:Fireflies"
         mc:Ignorable="d"
         Title="Fireflies" Height="358" Width="515">
-    <Grid>
-        <local:LEDStripRenderer x:Name="ledRenderer" Background="Black"></local:LEDStripRenderer>
+    <Grid Background="Black">
+        <Label x:Name="fpsLabel" 
+               Content="0"
+               FontSize="20"
+               Foreground="White"
+               Width="50" Height="40" 
+               VerticalAlignment="Top" HorizontalAlignment="Left"></Label>
+        
+        <local:LEDStripRenderer x:Name="ledRenderer"></local:LEDStripRenderer>
         <local:ScreenCapturePreview x:Name="capturePreview" HorizontalAlignment="Left" Height="200" VerticalAlignment="Top" Width="377" Margin="70,70,0,0" />
     </Grid>
 </Window>

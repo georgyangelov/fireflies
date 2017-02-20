@@ -9,11 +9,11 @@ namespace Fireflies
     /// </summary>
     public partial class MainWindow : Window
     {
+        private FrameClock frameClock = new FrameClock();
+
         public MainWindow()
         {
             InitializeComponent();
-
-            var frameClock = new FrameClock();
 
             ledRenderer.FrameClock = frameClock;
             capturePreview.FrameClock = frameClock;
@@ -26,6 +26,12 @@ namespace Fireflies
             // capturePreview.Capturer = capturer;
 
             frameClock.Start();
+
+            frameClock.OnFrame += UpdateFPSCounter;
+        }
+
+        private void UpdateFPSCounter(FrameInfo frame) {
+            fpsLabel.Content = (int)frameClock.CurrentFPS;
         }
     }
 }
