@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fireflies.Easing {
+namespace Fireflies.Functions.Easing {
     class Sine {
         static public double EaseIn(double x) {
             return 1 - Math.Cos(x * Math.PI / 2);

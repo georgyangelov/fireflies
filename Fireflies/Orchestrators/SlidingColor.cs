@@ -1,42 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace Fireflies.Orchestrators {
     class SlidingColor : IOrchestrator {
-        private Color color;
         private TimeSpan wrapAroundTime = new TimeSpan(0, 0, 0, 0, 2500);
 
-        // private EasingFunction easingFunction = Easing.Linear.EaseInOut;
-        private EasingFunction easingFunction = (new Easing.Polynomial(1.3)).EaseInOut;
-        // private EasingFunction easingFunction = Easing.Sine.EaseInOut;
+        private TimingFunction timing;
+        private ColorFunction background, foreground;
+
         private float trailLength = 10;
         private float forwardTrailLength = 10;
 
-        private Color lightColor = Colors.Yellow;
-        private Color darkColor = Colors.DarkRed;
-
-        public SlidingColor(Color color) {
-            this.color = color;
+        public SlidingColor(TimingFunction timing, ColorFunction background, ColorFunction foreground) {
+            this.timing = timing;
+            this.background = background;
+            this.foreground = foreground;
         }
 
-        public void Update(Color[] leds, TimeSpan totalTime, TimeSpan frameTime) {
-            float progress = (float)easingFunction((totalTime.Ticks % wrapAroundTime.Ticks) / (double)wrapAroundTime.Ticks),
-                  position = progress * leds.Length;
+        public void Update(Color[] leds, FrameInfo frame) {
+            double progress = timing(frame),
+                   position = progress * leds.Length;
             
             for (int i = 0; i < leds.Length; i++) {
-                float forwardIntensity = Math.Max(trailLength - forwardDistance(i, position, leds.Length), 0) / trailLength,
-                      backwardIntensity = Math.Max(forwardTrailLength - forwardDistance(position, i, leds.Length), 0) / forwardTrailLength,
-                      intensity = forwardIntensity + backwardIntensity;
-
-                leds[i] = crossfade(darkColor, lightColor, intensity);
+                double forwardIntensity = Math.Max(trailLength - forwardDistance(i, position, leds.Length), 0) / trailLength,
+                       backwardIntensity = Math.Max(forwardTrailLength - forwardDistance(position, i, leds.Length), 0) / forwardTrailLength,
+                       intensity = forwardIntensity + backwardIntensity;
+            
+                leds[i] = crossfade(background(frame), foreground(frame), intensity);
             }
         }
         
-        private Color crossfade(Color a, Color b, float factor) {
+        private Color crossfade(Color a, Color b, double factor) {
             if (factor < 0) {
                 factor = 0;
             } else if (factor > 1) {
@@ -51,7 +45,7 @@ namespace Fireflies.Orchestrators {
             };
         }
 
-        private float forwardDistance(float a, float b, int length) {
+        private double forwardDistance(double a, double b, int length) {
             if (a < b) {
                 return b - a;
             } else {

@@ -113,7 +113,7 @@ namespace Fireflies.Capture {
 
             // Try to get duplicated frame within given time
             // https://msdn.microsoft.com/en-us/library/windows/desktop/hh404615(v=vs.85).aspx
-            outputDuplication.AcquireNextFrame(100, out frameInformation, out screenResource);
+            outputDuplication.AcquireNextFrame(1000, out frameInformation, out screenResource);
 
             try {
                 if (frameInformation.TotalMetadataBufferSize == 0) {

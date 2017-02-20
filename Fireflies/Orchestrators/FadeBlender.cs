@@ -23,10 +23,10 @@ namespace Fireflies.Orchestrators {
         private float blendFactorToWhite = 0.000001f;
         private TimeSpan blendTime = new TimeSpan(0, 0, 1);
 
-        public void Update(Color[] leds, TimeSpan totalTime, TimeSpan frameTime) {
-            orchestrator.Update(blendColors, totalTime, frameTime);
+        public void Update(Color[] leds, FrameInfo frame) {
+            orchestrator.Update(blendColors, frame);
 
-            double blendProgress = frameTime.Ticks / (double)blendTime.Ticks;
+            double blendProgress = frame.frameTime.Ticks / (double)blendTime.Ticks;
             double blendFactorNowToBlack = Math.Pow(blendFactorToBlack, blendProgress);
             double blendFactorNowToWhite = Math.Pow(blendFactorToWhite, blendProgress);
 

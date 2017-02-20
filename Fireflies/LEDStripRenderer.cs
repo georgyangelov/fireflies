@@ -32,7 +32,17 @@ namespace Fireflies {
             ledsPerPixel = 1;
             visuals = new Ellipse[ledCount * ledsPerPixel];
             colors = new Color[ledCount];
-            orchestrator = new Orchestrators.SlidingColor(Colors.Aquamarine);
+
+            EasingFunction easing = new Functions.Easing.Polynomial(2).EaseInOut;
+            TimingFunction timing = new Functions.Timing.Looping(new TimeSpan(0, 0, 4)).Alternating;
+
+            orchestrator = new Orchestrators.SlidingColor(
+                //(FrameInfo f) => easing(timing(f)),
+                (FrameInfo f) => Functions.Utilities.wrapExtend(easing(timing(f)), 0, 1, 0.3),
+                //new Functions.Timing.Speed((FrameInfo f) => 0.4 * easing(timing(f)) + 0.2).Function,
+                new Functions.Color.Static(Colors.DarkBlue).Function,
+                new Functions.Color.Static(Colors.Aquamarine).Function
+            );
 
             initializeColorsTo(Colors.Black);
 
@@ -72,7 +82,10 @@ namespace Fireflies {
 
             elapsedTime = renderEvent.RenderingTime;
 
-            orchestrator.Update(colors, elapsedTime, frameTime);
+            orchestrator.Update(colors, new FrameInfo() {
+                totalTime = elapsedTime,
+                frameTime = frameTime
+            });
             updateVisuals();
         }
 

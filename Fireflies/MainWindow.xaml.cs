@@ -24,12 +24,12 @@ namespace Fireflies
         {
             InitializeComponent();
 
-            var capturer = new Capture.ScreenCapturer(0, 0);
+            // var capturer = new Capture.ScreenCapturer(0, 0);
 
-            var captureTask = new Task(() => capturer.Capture(), TaskCreationOptions.LongRunning);
-            captureTask.Start();
-
-            capturePreview.Capturer = capturer;
+            // var captureTask = new Task(() => capturer.Capture(), TaskCreationOptions.LongRunning);
+            // captureTask.Start();
+            
+            // capturePreview.Capturer = capturer;
         }
     }
 }

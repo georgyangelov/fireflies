@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fireflies.Easing {
+namespace Fireflies.Functions.Easing {
     class Polynomial {
         private double exponent;
 

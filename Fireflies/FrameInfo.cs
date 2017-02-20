@@ -5,5 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Fireflies {
-    delegate double EasingFunction(double fraction);
+    struct FrameInfo {
+        public TimeSpan frameTime;
+        public TimeSpan totalTime;
+    }
 }

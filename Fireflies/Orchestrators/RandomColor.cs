@@ -9,7 +9,7 @@ namespace Fireflies.Orchestrators {
     class RandomColor : IOrchestrator {
         private Random random = new Random();
 
-        public void Update(Color[] leds, TimeSpan totalTime, TimeSpan frameTime) {
+        public void Update(Color[] leds, FrameInfo frame) {
             for (int i = 0; i < leds.Length; i++) {
                 leds[i].R = (byte)random.Next();
                 leds[i].G = (byte)random.Next();

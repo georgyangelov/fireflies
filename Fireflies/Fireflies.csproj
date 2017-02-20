@@ -74,6 +74,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FrameInfo.cs" />
+    <Compile Include="Functions\Color\Static.cs" />
+    <Compile Include="Functions\Timing\Speed.cs" />
+    <Compile Include="Functions\Timing\Looping.cs" />
+    <Compile Include="Functions\Utilities.cs" />
     <Compile Include="ScreenCapturePreview.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -84,10 +89,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Capture\ScreenCapturer.cs" />
-    <Compile Include="Easing\Linear.cs" />
-    <Compile Include="Easing\Polynomial.cs" />
-    <Compile Include="EasingFunction.cs" />
-    <Compile Include="Easing\Sine.cs" />
+    <Compile Include="Functions\Easing\Linear.cs" />
+    <Compile Include="Functions\Easing\Polynomial.cs" />
+    <Compile Include="Functions\Functions.cs" />
+    <Compile Include="Functions\Easing\Sine.cs" />
     <Compile Include="LEDStripRenderer.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
