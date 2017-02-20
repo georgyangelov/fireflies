@@ -100,17 +100,18 @@ namespace Fireflies {
         }
 
         private DrawingVisual visual = new DrawingVisual();
+        public FrameClock FrameClock { get; set; }
 
         public ScreenCapturePreview() {
             AddVisualChild(visual);
             AddLogicalChild(visual);
 
             Loaded += (sender, e) => {
-                CompositionTarget.Rendering += Render;
+                FrameClock.OnFrame += Render;
             };
 
             Unloaded += (sender, e) => {
-                CompositionTarget.Rendering -= Render;
+                FrameClock.OnFrame -= Render;
             };
         }
 
@@ -149,21 +150,11 @@ namespace Fireflies {
         
             return bitmapSource;
         }
-
-        private TimeSpan elapsedTime = new TimeSpan(0);
-        private void Render(object sender, EventArgs e) {
+        
+        private void Render(FrameInfo frameInfo) {
             if (capturer == null) {
                 return;
             }
-
-            var renderEvent = (RenderingEventArgs)e;
-            var frameTime = renderEvent.RenderingTime - elapsedTime;
-
-            if (frameTime.Ticks <= 0) {
-                return;
-            }
-
-            elapsedTime = renderEvent.RenderingTime;
 
             var frame = capturer.GetFrame();
 

@@ -20,12 +20,10 @@ namespace Fireflies {
         private Ellipse[] visuals;
         private Color[] colors;
         private IOrchestrator orchestrator;
-
-        private TimeSpan elapsedTime = new TimeSpan(0);
-
-        private bool limitFps = false;
-        private double currentFps = 0, maxFps = 20;
+        
         private Label fpsLabel = new Label();
+
+        public FrameClock FrameClock { get; set; }
 
         public LEDStripRenderer() {
             ledCount = 90;
@@ -57,36 +55,19 @@ namespace Fireflies {
             Children.Add(fpsLabel);
 
             Loaded += (sender, e) => {
-                CompositionTarget.Rendering += UpdateColor;
+                FrameClock.OnFrame += UpdateColor;
             };
 
             Unloaded += (sender, e) => {
-                CompositionTarget.Rendering -= UpdateColor;
+                FrameClock.OnFrame -= UpdateColor;
             };
         }
         
-        private void UpdateColor(object sender, EventArgs e) {
-            var renderEvent = (RenderingEventArgs)e;
-            var frameTime = renderEvent.RenderingTime - elapsedTime;
-
-            if (frameTime.Ticks <= 0) {
-                return;
-            }
-
-            if (limitFps && frameTime.TotalSeconds < 1 / maxFps) {
-                return;
-            }
-
-            currentFps = currentFps * 0.95 + (1 / frameTime.TotalSeconds) * 0.05;
-            fpsLabel.Content = ((int)currentFps).ToString();
-
-            elapsedTime = renderEvent.RenderingTime;
-
-            orchestrator.Update(colors, new FrameInfo() {
-                totalTime = elapsedTime,
-                frameTime = frameTime
-            });
+        private void UpdateColor(FrameInfo frame) {
+            orchestrator.Update(colors, frame);
             updateVisuals();
+
+            fpsLabel.Content = (int)FrameClock.CurrentFPS;
         }
 
         private void initializeColorsTo(Color color) {

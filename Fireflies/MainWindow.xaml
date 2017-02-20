@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Fireflies" Height="358" Width="515">
     <Grid>
-        <local:LEDStripRenderer Background="Black"></local:LEDStripRenderer>
+        <local:LEDStripRenderer x:Name="ledRenderer" Background="Black"></local:LEDStripRenderer>
         <local:ScreenCapturePreview x:Name="capturePreview" HorizontalAlignment="Left" Height="200" VerticalAlignment="Top" Width="377" Margin="70,70,0,0" />
     </Grid>
 </Window>

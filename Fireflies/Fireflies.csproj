@@ -74,7 +74,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="FrameInfo.cs" />
+    <Compile Include="FrameClock.cs" />
     <Compile Include="Functions\Color\Static.cs" />
     <Compile Include="Functions\Timing\Speed.cs" />
     <Compile Include="Functions\Timing\Looping.cs" />
