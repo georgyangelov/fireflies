@@ -31,7 +31,7 @@ namespace Fireflies
         }
 
         private void UpdateFPSCounter(FrameInfo frame) {
-            fpsLabel.Content = (int)frameClock.CurrentFPS;
+            fpsLabel.Content = Math.Round(frameClock.CurrentFPS);
         }
     }
 }
