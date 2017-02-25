@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using Fireflies.Corrections;
 using Fireflies.Transport;
+using Fireflies.Frames;
 
 namespace Fireflies
 {
@@ -20,7 +21,7 @@ namespace Fireflies
             B = 224
         };
 
-        private FrameClock frameClock = new FrameClock();
+        private FPSCounter fps = new FPSCounter();
         private Communicator transport = new Communicator(
             new SerialProtocol(new SerialPort("COM4", 250000)),
             // (Color c) => TemperatureCorrection.correct(GammaCorrection.correct(c, 2.8f), 1f),
@@ -28,14 +29,16 @@ namespace Fireflies
             (Color c) => GammaCorrection.correct(c, 2.2f)
             // (Color c) => c
         );
+        private IFrameSource frameSource;
+        private FrameStopwatch frameStopwatch = new FrameStopwatch();
 
         public MainWindow()
         {
             InitializeComponent();
-            // serial.sendLEDUpdate(ledRenderer.colors);
 
-            ledRenderer.FrameClock = frameClock;
-            capturePreview.FrameClock = frameClock;
+            frameSource = new FramerateLimitSource(transport, 60);
+            // frameSource = new RenderingTargetSource();
+            frameSource.FrameRequest += handleFrame;
 
             // var capturer = new Capture.ScreenCapturer(0, 0);
             //
@@ -44,15 +47,26 @@ namespace Fireflies
             //
             // capturePreview.Capturer = capturer;
 
-            frameClock.Start();
-
-            frameClock.OnFrame += UpdateFPSCounter;
+            Loaded += MainWindow_Loaded;
         }
 
-        private void UpdateFPSCounter(FrameInfo frame) {
-            transport.sendFrame(ledRenderer.colors);
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e) {
+            frameStopwatch.Reset();
+            frameSource.Start();
+        }
 
-            fpsLabel.Content = Math.Round(frameClock.CurrentFPS);
+        private void handleFrame() {
+            FrameInfo frame = frameStopwatch.NewFrame();
+
+            ledRenderer.Update(frame);
+            transport.sendFrame(ledRenderer.colors);
+            fps.frameReady(frame);
+
+            // capturePreview.Update();
+            
+            Dispatcher.InvokeAsync(() => {
+               fpsLabel.Content = Math.Round(fps.CurrentFPS);
+            });
         }
     }
 }

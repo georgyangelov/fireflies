@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fireflies.Frames;
+using System;
 
 namespace Fireflies.Functions.Color {
     class Static {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fireflies.Frames;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -101,23 +102,11 @@ namespace Fireflies {
 
         private DrawingVisual visual = new DrawingVisual();
         
-        public FrameClock FrameClock { get; set; }
+        public IFrameSource FrameSource { get; set; }
 
         public ScreenCapturePreview() {
             AddVisualChild(visual);
             AddLogicalChild(visual);
-
-            Loaded += (sender, e) => {
-                if (FrameClock != null) {
-                    FrameClock.OnFrame += Render;
-                }
-            };
-
-            Unloaded += (sender, e) => {
-                if (FrameClock != null) {
-                    FrameClock.OnFrame -= Render;
-                }
-            };
         }
 
         protected override int VisualChildrenCount {
@@ -132,16 +121,11 @@ namespace Fireflies {
 
             return visual;
         }
-
-        private Capture.ScreenCapturer capturer = null;
-        public Capture.ScreenCapturer Capturer {
-            set { capturer = value; }
-        }
         
         [DllImport("gdi32")]
         static extern int DeleteObject(IntPtr o);
 
-        public static BitmapSource createBitmapSource(System.Drawing.Bitmap source) {
+        public static BitmapSource createBitmapSource(Bitmap source) {
             IntPtr bitmapDataPtr = source.GetHbitmap();
             BitmapSource bitmapSource = null;
 
@@ -156,15 +140,11 @@ namespace Fireflies {
             return bitmapSource;
         }
         
-        private void Render(FrameInfo frameInfo) {
-            if (capturer == null) {
-                return;
-            }
-
-            var frame = capturer.GetFrame();
-
+        public void Update(Bitmap bitmap) {
             var context = visual.RenderOpen();
-            context.DrawImage(new SharedBitmapSource(frame), new Rect(0, 0, ActualWidth, ActualHeight));
+
+            context.DrawImage(new SharedBitmapSource(bitmap), new Rect(0, 0, ActualWidth, ActualHeight));
+
             context.Close();
         }
     }

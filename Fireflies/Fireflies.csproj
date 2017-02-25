@@ -77,10 +77,14 @@
     <Compile Include="Corrections\GammaCorrection.cs" />
     <Compile Include="Corrections\TemperatureCorrection.cs" />
     <Compile Include="Corrections\HSLColor.cs" />
+    <Compile Include="Frames\FPSCounter.cs" />
+    <Compile Include="Frames\FrameStopwatch.cs" />
+    <Compile Include="Frames\FramerateLimitSource.cs" />
+    <Compile Include="Frames\RenderingTargetSource.cs" />
+    <Compile Include="Frames\IFrameSource.cs" />
     <Compile Include="Orchestrators\Splitter.cs" />
     <Compile Include="Transport\Communicator.cs" />
     <Compile Include="Transport\SerialProtocol.cs" />
-    <Compile Include="FrameClock.cs" />
     <Compile Include="Functions\Color\Static.cs" />
     <Compile Include="Functions\Timing\Speed.cs" />
     <Compile Include="Functions\Timing\Looping.cs" />
@@ -141,5 +145,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

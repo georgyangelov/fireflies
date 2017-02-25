@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fireflies.Frames;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace Fireflies {
         public Color[] colors;
         private IOrchestrator orchestrator;
 
-        public FrameClock FrameClock { get; set; }
+        public IFrameSource FrameSource { get; set; }
 
         public LEDStripRenderer() {
             ledCount = 97;
@@ -69,23 +70,14 @@ namespace Fireflies {
             createVisuals();
             updateVisuals();
             addVisualsAsChildren();
-
-            Loaded += (sender, e) => {
-                if (FrameClock != null) {
-                    FrameClock.OnFrame += UpdateColor;
-                }
-            };
-
-            Unloaded += (sender, e) => {
-                if (FrameClock != null) {
-                    FrameClock.OnFrame -= UpdateColor;
-                }
-            };
         }
         
-        private void UpdateColor(FrameInfo frame) {
+        public void Update(FrameInfo frame) {
             orchestrator.Update(colors, 0, colors.Length, frame);
-            updateVisuals();
+
+            Dispatcher.InvokeAsync(() => {
+                updateVisuals();
+            });
         }
 
         private void initializeColorsTo(Color color) {

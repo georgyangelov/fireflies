@@ -15,13 +15,17 @@ namespace Fireflies.Transport {
     }
 
     public class SerialProtocol {
+        public class NotReadyToSendException : Exception { }
+
         private SerialPort serial;
         private bool receivedAck = true;
 
+        public delegate void AckReceivedDelegate();
+        public event AckReceivedDelegate AckReceived;
+
         public SerialProtocol(SerialPort serial) {
             this.serial = serial;
-
-            serial.BaudRate = 250000;
+            
             serial.Open();
 
             while (!serial.IsOpen);
@@ -35,6 +39,7 @@ namespace Fireflies.Transport {
 
                 if (response == 0x4b) {
                     receivedAck = true;
+                    AckReceived?.Invoke();
                 }
             }
         }
@@ -44,6 +49,10 @@ namespace Fireflies.Transport {
         }
 
         public void sendPacket(Packet p) {
+            if (!availableForSending()) {
+                throw new NotReadyToSendException();
+            }
+
             byte[] lengthBuffer = BitConverter.GetBytes(p.length);
 
             serial.BaseStream.WriteByte(0xff);

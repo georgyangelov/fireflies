@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fireflies.Frames;
+using System;
 using System.Windows.Media;
 
 namespace Fireflies.Orchestrators {

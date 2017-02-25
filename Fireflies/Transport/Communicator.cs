@@ -1,13 +1,17 @@
-﻿using System;
+﻿using Fireflies.Frames;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace Fireflies.Transport {
-    public class Communicator {
+    public class Communicator : IFrameSource {
         public delegate Color Correction(Color c);
+
+        public event FrameUpdate FrameRequest;
 
         private Correction colorCorrection;
         private SerialProtocol protocol;
@@ -15,6 +19,19 @@ namespace Fireflies.Transport {
         public Communicator(SerialProtocol protocol, Correction colorCorrection) {
             this.protocol = protocol;
             this.colorCorrection = colorCorrection;
+        }
+        
+        public void Start() {
+            protocol.AckReceived += RequestNextFrame;
+            RequestNextFrame();
+        }
+
+        public void Stop() {
+            protocol.AckReceived -= RequestNextFrame;
+        }
+
+        private void RequestNextFrame() {
+            FrameRequest?.Invoke();
         }
 
         public void sendFrame(Color[] pixels) {
