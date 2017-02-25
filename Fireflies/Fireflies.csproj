@@ -74,6 +74,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Corrections\GammaCorrection.cs" />
+    <Compile Include="Corrections\TemperatureCorrection.cs" />
+    <Compile Include="Corrections\HSLColor.cs" />
+    <Compile Include="Orchestrators\Splitter.cs" />
+    <Compile Include="Transport\Communicator.cs" />
+    <Compile Include="Transport\SerialProtocol.cs" />
     <Compile Include="FrameClock.cs" />
     <Compile Include="Functions\Color\Static.cs" />
     <Compile Include="Functions\Timing\Speed.cs" />
@@ -108,7 +114,7 @@
     <Compile Include="Orchestrators\FadeBlender.cs" />
     <Compile Include="Orchestrators\RandomColor.cs" />
     <Compile Include="Orchestrators\SlidingColor.cs" />
-    <Compile Include="Orchestrators\StaticColor.cs" />
+    <Compile Include="Orchestrators\SolidColor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

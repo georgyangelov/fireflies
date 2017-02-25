@@ -8,8 +8,8 @@ namespace Fireflies.Orchestrators {
         private TimingFunction timing;
         private ColorFunction background, foreground;
 
-        private float trailLength = 10;
-        private float forwardTrailLength = 10;
+        private float trailLength = 4;
+        private float forwardTrailLength = 4;
 
         public SlidingColor(TimingFunction timing, ColorFunction background, ColorFunction foreground) {
             this.timing = timing;
@@ -17,16 +17,16 @@ namespace Fireflies.Orchestrators {
             this.foreground = foreground;
         }
 
-        public void Update(Color[] leds, FrameInfo frame) {
+        public void Update(Color[] leds, int offset, int length, FrameInfo frame) {
             double progress = timing(frame),
-                   position = progress * leds.Length;
+                   position = progress * length;
             
-            for (int i = 0; i < leds.Length; i++) {
-                double forwardIntensity = Math.Max(trailLength - forwardDistance(i, position, leds.Length), 0) / trailLength,
-                       backwardIntensity = Math.Max(forwardTrailLength - forwardDistance(position, i, leds.Length), 0) / forwardTrailLength,
+            for (int i = 0; i < length; i++) {
+                double forwardIntensity = Math.Max(trailLength - forwardDistance(i, position, length), 0) / trailLength,
+                       backwardIntensity = Math.Max(forwardTrailLength - forwardDistance(position, i, length), 0) / forwardTrailLength,
                        intensity = forwardIntensity + backwardIntensity;
             
-                leds[i] = crossfade(background(frame), foreground(frame), intensity);
+                leds[i + offset] = crossfade(background(frame), foreground(frame), intensity);
             }
         }
         

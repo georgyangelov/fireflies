@@ -18,27 +18,51 @@ namespace Fireflies {
     public class LEDStripRenderer : Panel {
         int ledCount, ledsPerPixel;
         private Ellipse[] visuals;
-        private Color[] colors;
+        public Color[] colors;
         private IOrchestrator orchestrator;
 
         public FrameClock FrameClock { get; set; }
 
         public LEDStripRenderer() {
-            ledCount = 90;
-            ledsPerPixel = 1;
+            ledCount = 97;
+            ledsPerPixel = 3;
             visuals = new Ellipse[ledCount * ledsPerPixel];
             colors = new Color[ledCount];
 
             EasingFunction easing = new Functions.Easing.Polynomial(2).EaseInOut;
-            TimingFunction timing = new Functions.Timing.Looping(new TimeSpan(0, 0, 4)).Alternating;
+            TimingFunction screenTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Loop;
+            TimingFunction caseTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Alternating;
 
-            orchestrator = new Orchestrators.SlidingColor(
-                //(FrameInfo f) => easing(timing(f)),
-                (FrameInfo f) => Functions.Utilities.wrapExtend(easing(timing(f)), 0, 1, 0.3),
-                //new Functions.Timing.Speed((FrameInfo f) => 0.4 * easing(timing(f)) + 0.2).Function,
-                new Functions.Color.Static(Colors.DarkBlue).Function,
-                new Functions.Color.Static(Colors.Aquamarine).Function
+            var screenOrchestrator = new Orchestrators.SlidingColor(
+                // (FrameInfo f) => Functions.Utilities.wrapExtend(easing(screenTiming(f)), 0, 1, 0.3),
+                (FrameInfo f) => screenTiming(f),
+                (FrameInfo f) => Color.Multiply(Colors.Green, 0.2f),
+                (FrameInfo f) => Colors.Green
             );
+
+            var caseOrchestrator = new Orchestrators.SlidingColor(
+                new Functions.Timing.Speed((FrameInfo f) => 3 * easing(caseTiming(f)) + 0.3).Function,
+                (FrameInfo f) => Colors.Black,
+                (FrameInfo f) => Colors.Red
+            );
+
+            //new Orchestrators.SlidingColor(
+            //timing,
+            //  (FrameInfo f) => easing(timing(f)),
+            //(FrameInfo f) => Functions.Utilities.wrapExtend(easing(timing(f)), 0, 1, 0.3),
+            //new Functions.Timing.Speed((FrameInfo f) => 0.4 * easing(timing(f)) + 0.2).Function,
+            //  new Functions.Color.Static(Colors.Black).Function,
+            //  new Functions.Color.Static(Colors.Orange).Function
+            //);
+
+            var blankOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Black);
+
+            orchestrator = new Orchestrators.Splitter(
+                new int[] { 23, 44, 30 },
+                new IOrchestrator[] { caseOrchestrator, blankOrchestrator, screenOrchestrator }
+            );
+
+            // orchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.White);
 
             initializeColorsTo(Colors.Black);
 
@@ -60,7 +84,7 @@ namespace Fireflies {
         }
         
         private void UpdateColor(FrameInfo frame) {
-            orchestrator.Update(colors, frame);
+            orchestrator.Update(colors, 0, colors.Length, frame);
             updateVisuals();
         }
 

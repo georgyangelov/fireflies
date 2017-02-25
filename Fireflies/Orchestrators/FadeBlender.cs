@@ -23,14 +23,14 @@ namespace Fireflies.Orchestrators {
         private float blendFactorToWhite = 0.000001f;
         private TimeSpan blendTime = new TimeSpan(0, 0, 1);
 
-        public void Update(Color[] leds, FrameInfo frame) {
-            orchestrator.Update(blendColors, frame);
+        public void Update(Color[] leds, int offset, int length, FrameInfo frame) {
+            orchestrator.Update(blendColors, offset, length, frame);
 
             double blendProgress = frame.frameTime.Ticks / (double)blendTime.Ticks;
             double blendFactorNowToBlack = Math.Pow(blendFactorToBlack, blendProgress);
             double blendFactorNowToWhite = Math.Pow(blendFactorToWhite, blendProgress);
 
-            for (int i = 0; i < leds.Length; i++) {
+            for (int i = offset; i < offset + length; i++) {
                 if (leds[i].R < blendColors[i].R) {
                     leds[i].R = (byte)(blendFactorNowToWhite * leds[i].R + (1 - blendFactorNowToWhite) * blendColors[i].R);
                 } else {
