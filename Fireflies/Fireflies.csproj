@@ -82,6 +82,8 @@
     <Compile Include="Frames\FramerateLimitSource.cs" />
     <Compile Include="Frames\RenderingTargetSource.cs" />
     <Compile Include="Frames\IFrameSource.cs" />
+    <Compile Include="LEDController.cs" />
+    <Compile Include="Orchestrators\AlignTest.cs" />
     <Compile Include="Orchestrators\Splitter.cs" />
     <Compile Include="Transport\Communicator.cs" />
     <Compile Include="Transport\SerialProtocol.cs" />
@@ -89,7 +91,7 @@
     <Compile Include="Functions\Timing\Speed.cs" />
     <Compile Include="Functions\Timing\Looping.cs" />
     <Compile Include="Functions\Utilities.cs" />
-    <Compile Include="ScreenCapturePreview.cs" />
+    <Compile Include="Controls\ScreenCapturePreview.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -103,7 +105,7 @@
     <Compile Include="Functions\Easing\Polynomial.cs" />
     <Compile Include="Functions\Functions.cs" />
     <Compile Include="Functions\Easing\Sine.cs" />
-    <Compile Include="LEDStripRenderer.cs" />
+    <Compile Include="Controls\LEDStripRenderer.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

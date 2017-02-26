@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace Fireflies {
+namespace Fireflies.Controls {
     public class ScreenCapturePreview : FrameworkElement {
         class SharedBitmapSource : BitmapSource, IDisposable {
             public Bitmap Bitmap { get; private set; }

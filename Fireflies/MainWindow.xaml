@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Fireflies"
+        xmlns:local="clr-namespace:Fireflies.Controls"
         mc:Ignorable="d"
-        Title="Fireflies" Height="358" Width="515">
+        Title="Fireflies" Height="505" Width="819">
     <Grid Background="Black">
         <Label x:Name="fpsLabel" 
                Content="0"
@@ -13,8 +13,10 @@
                Foreground="White"
                Width="50" Height="40" 
                VerticalAlignment="Top" HorizontalAlignment="Left"></Label>
-        
-        <local:LEDStripRenderer x:Name="ledRenderer"></local:LEDStripRenderer>
+
+        <local:LEDStripRenderer x:Name="screenLEDRenderer" PixelCount="30" LEDsPerPixel="3" PixelOffset="-15" Margin="60,44,338,215"></local:LEDStripRenderer>
+        <local:LEDStripRenderer x:Name="caseLEDRenderer" PixelCount="23" LEDsPerPixel="3" PixelOffset="-14" Margin="524,248,35,32"></local:LEDStripRenderer>
+
         <local:ScreenCapturePreview x:Name="capturePreview" HorizontalAlignment="Left" Height="200" VerticalAlignment="Top" Width="377" Margin="70,70,0,0" />
     </Grid>
 </Window>
