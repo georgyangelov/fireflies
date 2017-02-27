@@ -15,5 +15,14 @@ namespace Fireflies.Corrections {
                 B = (byte)(255 * Math.Pow(color.B / (double)255, gamma))
             };
         }
+
+        public static Color correct(Color color, float gammaR, float gammaG, float gammaB) {
+            return new Color {
+                A = color.A,
+                R = (byte)(255 * Math.Pow(color.R / (double)255, gammaR)),
+                G = (byte)(255 * Math.Pow(color.G / (double)255, gammaG)),
+                B = (byte)(255 * Math.Pow(color.B / (double)255, gammaB))
+            };
+        }
     }
 }

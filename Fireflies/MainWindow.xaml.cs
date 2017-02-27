@@ -38,10 +38,11 @@ namespace Fireflies
 
         private void handleFrame() {
             Dispatcher.InvokeAsync(() => {
-                // capturePreview.Update();
-
                 caseLEDRenderer.Update(controller.Pixels, 0, 23);
                 screenLEDRenderer.Update(controller.Pixels, 67, 30);
+
+                // capturePreview.Update(controller.CurrentScreenFrame);
+
                 fpsLabel.Content = Math.Round(controller.CurrentFPS);
             });
         }

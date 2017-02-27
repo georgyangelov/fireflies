@@ -19,8 +19,8 @@ public:
 		protocol.setup();
 
 		FastLED.addLeds<MODEL, OUTPUT_PIN, COLOR_ORDER>(leds, PIXEL_COUNT); // .setCorrection(TypicalSMD5050);
-		FastLED.setTemperature(Tungsten100W);
-		FastLED.setBrightness(128);
+		// FastLED.setTemperature(Tungsten100W);
+		// FastLED.setBrightness(128);
 
 		FastLED.show();
 

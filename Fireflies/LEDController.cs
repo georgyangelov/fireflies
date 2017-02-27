@@ -1,4 +1,5 @@
-﻿using Fireflies.Corrections;
+﻿using Fireflies.Capture;
+using Fireflies.Corrections;
 using Fireflies.Frames;
 using Fireflies.Transport;
 using System;
@@ -26,16 +27,39 @@ namespace Fireflies {
 
         public event FrameUpdate FrameReady;
 
+        private ScreenCapturer screen = new ScreenCapturer(0, 0);
+
+        public System.Drawing.Bitmap CurrentScreenFrame {
+            get => screen.CurrentFrame;
+        }
+
         public LEDController(SerialPort serialPort) {
             Pixels = new Color[pixelCount];
             initializePixelsTo(Colors.Black);
 
             orchestrator = buildOrchestrator();
 
+            Color correction = new Color {
+                R = 255,
+                G = 255,
+                B = 180
+            };
+
             transport = new Communicator(
                 new SerialProtocol(serialPort),
-                (Color c) => GammaCorrection.correct(c, 2.2f)
+                (Color c) =>
+                    GammaCorrection.correct(
+                        BrightnessCorrection.correct(
+                            TemperatureCorrection.correct(c, correction),
+                            0.5
+                        ),
+                        1.6f, 1.8f, 2.0f
+                        //2.2f
+                    )
             );
+
+            var captureTask = new Task(() => screen.Capture(), TaskCreationOptions.LongRunning);
+            captureTask.Start();
 
             frameSource = new FramerateLimitSource(transport, 60);
             frameSource.FrameRequest += handleFrame;
@@ -64,10 +88,29 @@ namespace Fireflies {
             var blankOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Black);
 
             var alignOrchestrator = new Orchestrators.AlignTest();
+            var screenColorOrchestrator = new Orchestrators.ScreenColor(screen);
+            var greenOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
+                A = 255,
+                R = 0x65,
+                G = 0xff,
+                B = 0x00
+            });
+            var blueOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
+                A = 255,
+                R = 30,
+                G = 144,
+                B = 255
+            });
+            var grayOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
+                A = 255,
+                R = 255,
+                G = 255,
+                B = 255
+            });
 
             return new Orchestrators.Splitter(
                 new int[] { 23, 44, 30 },
-                new IOrchestrator[] { caseOrchestrator, blankOrchestrator, screenOrchestrator }
+                new IOrchestrator[] { blankOrchestrator, blankOrchestrator, screenColorOrchestrator }
             );
         }
 
@@ -78,6 +121,8 @@ namespace Fireflies {
 
             transport.sendFrame(Pixels);
             fps.frameReady(frame);
+
+            screen.NextFrame();
 
             FrameReady?.Invoke();
         }

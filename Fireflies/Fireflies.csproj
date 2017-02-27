@@ -74,6 +74,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Corrections\BrightnessCorrection.cs" />
     <Compile Include="Corrections\GammaCorrection.cs" />
     <Compile Include="Corrections\TemperatureCorrection.cs" />
     <Compile Include="Corrections\HSLColor.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="Frames\IFrameSource.cs" />
     <Compile Include="LEDController.cs" />
     <Compile Include="Orchestrators\AlignTest.cs" />
+    <Compile Include="Orchestrators\ScreenColor.cs" />
     <Compile Include="Orchestrators\Splitter.cs" />
     <Compile Include="Transport\Communicator.cs" />
     <Compile Include="Transport\SerialProtocol.cs" />
@@ -110,10 +112,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Themes\Generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IOrchestrator.cs" />

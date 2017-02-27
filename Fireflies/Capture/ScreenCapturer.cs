@@ -27,6 +27,10 @@ namespace Fireflies.Capture {
 
         private bool frameReady = false;
 
+        public System.Drawing.Bitmap CurrentFrame {
+            get => buffer[2];
+        }
+
         public ScreenCapturer(int adapterIndex, int outputIndex) {
             this.adapterIndex = adapterIndex;
             this.outputIndex = outputIndex;
@@ -48,15 +52,17 @@ namespace Fireflies.Capture {
             }
         }
 
-        public System.Drawing.Bitmap GetFrame() {
+        public bool NextFrame() {
             if (frameReady) {
                 lock (swapLock) {
                     SwapBuffers(1, 2);
                     frameReady = false;
                 }
+
+                return true;
             }
 
-            return buffer[2];
+            return false;
         }
 
         private void initializeCapture() {
