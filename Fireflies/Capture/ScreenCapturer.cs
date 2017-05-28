@@ -11,11 +11,12 @@ using SharpDX.Direct3D11;
 using System.Drawing.Imaging;
 using SharpDX;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Fireflies.Capture {
     public class ScreenCapturer : IDisposable {
         private Object swapLock = new Object();
-        private System.Drawing.Bitmap[] buffer = new System.Drawing.Bitmap[3];
+        private byte[][] buffer = new byte[3][];
 
         private int adapterIndex, outputIndex;
 
@@ -23,13 +24,15 @@ namespace Fireflies.Capture {
         private Device device;
         private Output5 output;
         private Texture2D stagingTexture;
-        private int screenWidth, screenHeight;
 
         private bool frameReady = false;
 
-        public System.Drawing.Bitmap CurrentFrame {
+        public byte[] CurrentFrame {
             get => buffer[2];
         }
+
+        public int ScreenWidth { get; private set; }
+        public int ScreenHeight { get; private set; }
 
         public ScreenCapturer(int adapterIndex, int outputIndex) {
             this.adapterIndex = adapterIndex;
@@ -39,7 +42,7 @@ namespace Fireflies.Capture {
         }
 
         private void SwapBuffers(int i, int j) {
-            System.Drawing.Bitmap tmp = buffer[i];
+            byte[] tmp = buffer[i];
 
             buffer[i] = buffer[j];
             buffer[j] = tmp;
@@ -75,12 +78,12 @@ namespace Fireflies.Capture {
 
             var desktopBounds = output.Description.DesktopBounds;
 
-            screenWidth = desktopBounds.Right - desktopBounds.Left;
-            screenHeight = desktopBounds.Bottom - desktopBounds.Top;
+            ScreenWidth = desktopBounds.Right - desktopBounds.Left;
+            ScreenHeight = desktopBounds.Bottom - desktopBounds.Top;
 
-            buffer[0] = new System.Drawing.Bitmap(screenWidth, screenHeight, PixelFormat.Format32bppArgb);
-            buffer[1] = new System.Drawing.Bitmap(screenWidth, screenHeight, PixelFormat.Format32bppArgb);
-            buffer[2] = new System.Drawing.Bitmap(screenWidth, screenHeight, PixelFormat.Format32bppArgb);
+            buffer[0] = new byte[ScreenWidth * ScreenHeight * 4];
+            buffer[1] = new byte[ScreenWidth * ScreenHeight * 4];
+            buffer[2] = new byte[ScreenWidth * ScreenHeight * 4];
 
             // A texture that can be accessed by the CPU (by copying from the GPU memory)
             // https://msdn.microsoft.com/en-us/library/windows/desktop/bb205132(v=vs.85).aspx#Accessing
@@ -93,8 +96,8 @@ namespace Fireflies.Capture {
                 CpuAccessFlags = CpuAccessFlags.Read,
                 BindFlags = BindFlags.None,
                 Format = Format.B8G8R8A8_UNorm,
-                Width = screenWidth,
-                Height = screenHeight,
+                Width = ScreenWidth,
+                Height = ScreenHeight,
                 OptionFlags = ResourceOptionFlags.None,
                 MipLevels = 1,
                 ArraySize = 1,
@@ -104,9 +107,6 @@ namespace Fireflies.Capture {
         }
 
         public void Dispose() {
-            buffer[0].Dispose();
-            buffer[1].Dispose();
-            buffer[2].Dispose();
             stagingTexture.Dispose();
             output.Dispose();
             device.Dispose();
@@ -150,28 +150,18 @@ namespace Fireflies.Capture {
                 var mapSource = device.ImmediateContext.MapSubresource(stagingTexture, 0, MapMode.Read, MapFlags.None);
 
                 try {
-                    var boundsRectangle = new System.Drawing.Rectangle(0, 0, screenWidth, screenHeight);
-
                     // Copy pixels from screen capture Texture to GDI bitmap
                     var bitmap = buffer[0];
-                    var mapDest = bitmap.LockBits(boundsRectangle, ImageLockMode.WriteOnly, bitmap.PixelFormat);
+                    var sourcePtr = mapSource.DataPointer;
 
-                    try {
-                        var sourcePtr = mapSource.DataPointer;
-                        var destPtr = mapDest.Scan0;
-                        for (int y = 0; y < screenHeight; y++) {
-                            // Copy a single line
-                            Utilities.CopyMemory(destPtr, sourcePtr, screenWidth * 4);
+                    // for (int y = 0; y < ScreenHeight; y++) {
+                    //     Marshal.Copy(sourcePtr, bitmap, 0, ScreenWidth * 4);
+                    //         
+                    //     sourcePtr = IntPtr.Add(sourcePtr, mapSource.RowPitch);
+                    // }
+                    Marshal.Copy(sourcePtr, bitmap, 0, ScreenWidth * ScreenHeight * 4);
 
-                            // Advance pointers
-                            sourcePtr = IntPtr.Add(sourcePtr, mapSource.RowPitch);
-                            destPtr = IntPtr.Add(destPtr, mapDest.Stride);
-                        }
-
-                        frameRendered();
-                    } finally {
-                        bitmap.UnlockBits(mapDest);
-                    }
+                    frameRendered();
                 } finally {
                     device.ImmediateContext.UnmapSubresource(stagingTexture, 0);
                 }

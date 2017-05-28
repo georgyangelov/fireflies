@@ -83,6 +83,7 @@
     <Compile Include="Frames\FramerateLimitSource.cs" />
     <Compile Include="Frames\RenderingTargetSource.cs" />
     <Compile Include="Frames\IFrameSource.cs" />
+    <Compile Include="Functions\Color\Helpers.cs" />
     <Compile Include="LEDController.cs" />
     <Compile Include="Orchestrators\AlignTest.cs" />
     <Compile Include="Orchestrators\ScreenColor.cs" />

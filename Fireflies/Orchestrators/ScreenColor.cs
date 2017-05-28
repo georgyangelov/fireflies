@@ -18,30 +18,13 @@ namespace Fireflies.Orchestrators {
         }
 
         void IOrchestrator.Update(Color[] leds, int offset, int length, FrameInfo timing) {
-            System.Drawing.Bitmap frame = screen.CurrentFrame;
-            int width = frame.Width;
-            int height = frame.Height;
-            byte[] pixels = bitmapToArray(frame);
+            byte[] frame = screen.CurrentFrame;
+            int width = screen.ScreenWidth;
+            int height = screen.ScreenHeight;
             
             for (int i = 0; i < length; i++) {
-                leds[i + offset] = crossfade(leds[i + offset], getColorForPixel(i, length, pixels, width, height), 0.5);
+                leds[i + offset] = Functions.Color.Helpers.crossfade(leds[i + offset], getColorForPixel(i, length, frame, width, height), 0.2);
             }
-        }
-
-        // TODO: Extract from here and from SlidingColor
-        private Color crossfade(Color a, Color b, double factor) {
-            if (factor < 0) {
-                factor = 0;
-            } else if (factor > 1) {
-                factor = 1;
-            }
-
-            return new Color() {
-                R = (byte)(a.R * (1 - factor) + b.R * factor),
-                G = (byte)(a.G * (1 - factor) + b.G * factor),
-                B = (byte)(a.B * (1 - factor) + b.B * factor),
-                A = 255
-            };
         }
 
         private Color getColorForPixel(int i, int pixelCount, byte[] screenFrame, int screenWidth, int screenHeight) {
@@ -82,8 +65,8 @@ namespace Fireflies.Orchestrators {
             byte r, g, b;
             int rSum = 0, gSum = 0, bSum = 0, pixelCount = 0;
 
-            for (int y = area.Top; y < area.Bottom; y++) {
-                for (int x = area.Left; x < area.Right; x++) {
+            for (int y = area.Top; y < area.Bottom; y += 2) {
+                for (int x = area.Left; x < area.Right; x += 2) {
                     pixelOffset = y * screenWidth * 4 + x * 4;
                     r = pixels[pixelOffset + 2];
                     g = pixels[pixelOffset + 1];
@@ -106,28 +89,6 @@ namespace Fireflies.Orchestrators {
                 G = (byte)(gSum / pixelCount),
                 B = (byte)(bSum / pixelCount)
             };
-        }
-
-        private byte[] bitmapToArray(System.Drawing.Bitmap frame) {
-            byte[] pixelData = new byte[frame.Height * frame.Width * 4];
-
-            BitmapData bitmap = frame.LockBits(
-                new System.Drawing.Rectangle(0, 0, frame.Width, frame.Height),
-                ImageLockMode.ReadOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb
-            );
-
-            int r = 0, g = 0, b = 0;
-            IntPtr ptr = bitmap.Scan0;
-
-            for (int y = 0; y < bitmap.Height; y++) {
-                Marshal.Copy(ptr, pixelData, y * frame.Width * 4, frame.Width * 4);
-                ptr = IntPtr.Add(ptr, bitmap.Stride);
-            }
-
-            frame.UnlockBits(bitmap);
-
-            return pixelData;
         }
 
         private int wrap(int i, int length) {

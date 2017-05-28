@@ -29,7 +29,7 @@ namespace Fireflies {
 
         private ScreenCapturer screen = new ScreenCapturer(0, 0);
 
-        public System.Drawing.Bitmap CurrentScreenFrame {
+        public byte[] CurrentScreenFrame {
             get => screen.CurrentFrame;
         }
 
@@ -51,7 +51,7 @@ namespace Fireflies {
                     GammaCorrection.correct(
                         BrightnessCorrection.correct(
                             TemperatureCorrection.correct(c, correction),
-                            0.5
+                            0.7
                         ),
                         1.6f, 1.8f, 2.0f
                         //2.2f
@@ -81,9 +81,23 @@ namespace Fireflies {
 
             var caseOrchestrator = new Orchestrators.SlidingColor(
                 new Functions.Timing.Speed((FrameInfo f) => 3 * easing(caseTiming(f)) + 0.3).Function,
-                (FrameInfo f) => Colors.Black,
-                (FrameInfo f) => Colors.Red
+                (FrameInfo f) => Colors.Blue,
+                (FrameInfo f) => Colors.White
             );
+            var staticCaseOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Green);
+
+            var alternatingColor = new Functions.Timing.Looping(TimeSpan.FromSeconds(30));
+            var colors = new Color[] { Colors.Red, Colors.Green, Colors.Blue, Colors.White };
+
+            var colorBlendOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => {
+                var progress = alternatingColor.Loop(f) * colors.Length;
+                var colorIndex = (int)progress % colors.Length;
+
+                var colorA = colors[colorIndex];
+                var colorB = colors[(colorIndex + 1) % colors.Length];
+
+                return Functions.Color.Helpers.crossfade(colorA, colorB, progress - colorIndex);
+            });
 
             var blankOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Black);
 
@@ -110,7 +124,7 @@ namespace Fireflies {
 
             return new Orchestrators.Splitter(
                 new int[] { 23, 44, 30 },
-                new IOrchestrator[] { blankOrchestrator, blankOrchestrator, screenColorOrchestrator }
+                new IOrchestrator[] { colorBlendOrchestrator, blankOrchestrator, blankOrchestrator }
             );
         }
 
