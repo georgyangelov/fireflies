@@ -33,6 +33,10 @@ namespace Fireflies.Orchestrators {
         void IOrchestrator.Update(Color[] leds, int offset, int length, FrameInfo f) {
             var pixelsPerSegment = length / segments;
 
+            if (pixelsPerSegment == 0) {
+                pixelsPerSegment = 1;
+            }
+
             for (int i = 0; i < length; i++) {
                 var segmentIndex = i / pixelsPerSegment;
                 var colorOffset = offsets[segmentIndex % segments];

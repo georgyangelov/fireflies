@@ -10,6 +10,7 @@ struct Packet {
 
 class SerialProtocol {
 	bool reading = false,
+		 timedOut = false,
 		 packetReady = false;
 
 	Timeout& receiveTimeout;
@@ -27,11 +28,18 @@ public:
 
 	void setup() {
 		Serial.begin(250000);
+		Serial.setTimeout(500);
 
 		while (!Serial);
 	}
 
 	void loop() {
+		if (reading && receiveTimeout.timedOut()) {
+			reading = false;
+			timedOut = true;
+			return;
+		}
+
 		// 4 = begin marker + type + length
 		if (!reading && Serial.available() >= 4) {
 			receiveTimeout.reset();
@@ -66,9 +74,15 @@ public:
 					packetReady = true;
 				}
 			}
-		} else if (receiveTimeout.timedOut()) {
-			reading = false;
 		}
+	}
+
+	bool hasTimedOut() {
+		bool timedOut = this->timedOut;
+
+		this->timedOut = false;
+
+		return timedOut;
 	}
 
 	bool hasPacketReady() {
@@ -76,11 +90,12 @@ public:
 	}
 
 	const Packet& getPacket() {
+		packetReady = false;
+
 		return packet;
 	}
 
 	void ackPacket() {
-		packetReady = false;
 		Serial.write(ACK);
 	}
 };

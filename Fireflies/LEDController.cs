@@ -67,6 +67,7 @@ namespace Fireflies {
             captureTask.Start();
 
             frameSource = new FramerateLimitSource(transport, 60);
+            // frameSource = new RenderingTargetSource();
             frameSource.FrameRequest += handleFrame;
 
             frameStopwatch.Reset();
@@ -127,11 +128,11 @@ namespace Fireflies {
 
                 return Functions.Color.Helpers.crossfade(colorA, colorB, progress - colorIndex);
             };
-            var pulsingColorOrchestrator = new Orchestrators.PulsingColors(colorBlend, 23);
+            var pulsingColorOrchestrator = new Orchestrators.PulsingColors(colorBlend, 34);
 
             return new Orchestrators.Splitter(
                 new int[] { 23, 40, 34 },
-                new IOrchestrator[] { pulsingColorOrchestrator, blankOrchestrator, screenOrchestrator }
+                new IOrchestrator[] { pulsingColorOrchestrator, blankOrchestrator, pulsingColorOrchestrator }
             );
         }
 

@@ -3,8 +3,6 @@
 #define OUTPUT_PIN 4 // D2
 #define COLOR_ORDER BRG
 
-// NeoPixelBus<NeoBrgFeature, NeoEsp8266Uart800KbpsMethod> ledStrip(100, 5);
-
 class LEDController {
 	Timeout receiveDataTimeout;
 	Timeout receivePacketTimeout;
@@ -12,7 +10,7 @@ class LEDController {
 	CRGB leds[PIXEL_COUNT];
 
 public:
-	LEDController() : receiveDataTimeout(1000), protocol(receiveDataTimeout), receivePacketTimeout(5000) {
+	LEDController() : receiveDataTimeout(1000), protocol(receiveDataTimeout), receivePacketTimeout(1000) {
 	}
 
 	void setup() {
@@ -23,9 +21,6 @@ public:
 		// FastLED.setBrightness(128);
 
 		FastLED.show();
-
-		// ledStrip.Begin();
-		// ledStrip.Show();
 	}
 
 	void loop() {
@@ -39,17 +34,16 @@ public:
 			if (packet->type == 1) {
 				for (uint16 i = 0; i < packet->length / 3; i++) {
 					leds[i] = CRGB(packet->data[i * 3], packet->data[i * 3 + 1], packet->data[i * 3 + 2]);
-					// ledStrip.SetPixelColor(i, RgbColor(packet->data[i * 3], packet->data[i * 3 + 1], packet->data[i * 3 + 2]));
 				}
 
-				// ledStrip.Show();
 				FastLED.show();
 			} else {
+				showStaticColor(CRGB(0, 0, 128));
 				BlinkSignal::signal(5);
 			}
 
 			protocol.ackPacket();
-		} else if (receivePacketTimeout.timedOut()) {
+		} else if (protocol.hasTimedOut() || receivePacketTimeout.timedOut()) {
 			receivePacketTimeout.reset();
 			turnOffLeds();
 		}
@@ -57,13 +51,17 @@ public:
 
 private:
 
-	void turnOffLeds() {
-		auto black = CRGB(0, 0, 0);
-
+	void showStaticColor(CRGB color) {
 		for (uint16 i = 0; i < PIXEL_COUNT; i++) {
-			leds[i] = black;
+			leds[i] = color;
 		}
 
 		FastLED.show();
+	}
+
+	void turnOffLeds() {
+		auto black = CRGB(0, 0, 0);
+
+		showStaticColor(black);
 	}
 };
