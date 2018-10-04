@@ -1,6 +1,6 @@
 #define PIXEL_COUNT 97
 #define MODEL WS2812B
-#define OUTPUT_PIN 4
+#define OUTPUT_PIN 4 // D2
 #define COLOR_ORDER BRG
 
 // NeoPixelBus<NeoBrgFeature, NeoEsp8266Uart800KbpsMethod> ledStrip(100, 5);

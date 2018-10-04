@@ -14,18 +14,11 @@ namespace Fireflies
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static LEDController controller = new LEDController(new SerialPort("COM4", 250000));
+        private static LEDController controller = new LEDController(new SerialPort("COM3", 250000));
         
         public MainWindow()
         {
             InitializeComponent();
-            
-            // var capturer = new Capture.ScreenCapturer(0, 0);
-            //
-            // var captureTask = new Task(() => capturer.Capture(), TaskCreationOptions.LongRunning);
-            // captureTask.Start();
-            //
-            // capturePreview.Capturer = capturer;
 
             Loaded += (target, e) => {
                 controller.FrameReady += handleFrame;
@@ -34,14 +27,16 @@ namespace Fireflies
             Unloaded += (target, e) => {
                 controller.FrameReady -= handleFrame;
             };
+
+            // capturePreview.Update(controller.TestFrame);
         }
 
         private void handleFrame() {
             Dispatcher.InvokeAsync(() => {
                 caseLEDRenderer.Update(controller.Pixels, 0, 23);
-                screenLEDRenderer.Update(controller.Pixels, 67, 30);
+                screenLEDRenderer.Update(controller.Pixels, 63, 34);
 
-                // capturePreview.Update(controller.CurrentScreenFrame);
+                
 
                 fpsLabel.Content = Math.Round(controller.CurrentFPS);
             });

@@ -28,10 +28,15 @@ namespace Fireflies {
         public event FrameUpdate FrameReady;
 
         private ScreenCapturer screen = new ScreenCapturer(0, 0);
+        private Orchestrators.ScreenColor screenOrchestrator;
 
         public byte[] CurrentScreenFrame {
             get => screen.CurrentFrame;
         }
+
+        // public System.Drawing.Bitmap TestFrame {
+        //    get => gpuScreenOrchestrator.getBitmap();
+        // }
 
         public LEDController(SerialPort serialPort) {
             Pixels = new Color[pixelCount];
@@ -40,9 +45,9 @@ namespace Fireflies {
             orchestrator = buildOrchestrator();
 
             Color correction = new Color {
-                R = 255,
-                G = 255,
-                B = 180
+                R = 255, // 255
+                G = 250, // 255
+                B = 170  // 180
             };
 
             transport = new Communicator(
@@ -51,7 +56,7 @@ namespace Fireflies {
                     GammaCorrection.correct(
                         BrightnessCorrection.correct(
                             TemperatureCorrection.correct(c, correction),
-                            0.7
+                            0.9
                         ),
                         1.6f, 1.8f, 2.0f
                         //2.2f
@@ -73,11 +78,11 @@ namespace Fireflies {
             TimingFunction screenTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Loop;
             TimingFunction caseTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Alternating;
 
-            var screenOrchestrator = new Orchestrators.SlidingColor(
-                (FrameInfo f) => screenTiming(f),
-                (FrameInfo f) => Color.Multiply(Colors.Green, 0.2f),
-                (FrameInfo f) => Colors.Green
-            );
+            //  var screenOrchestrator = new Orchestrators.SlidingColor(
+            //      (FrameInfo f) => screenTiming(f),
+            //      (FrameInfo f) => Color.Multiply(Colors.Green, 0.2f),
+            //      (FrameInfo f) => Colors.Green
+            //  );
 
             var caseOrchestrator = new Orchestrators.SlidingColor(
                 new Functions.Timing.Speed((FrameInfo f) => 3 * easing(caseTiming(f)) + 0.3).Function,
@@ -85,20 +90,7 @@ namespace Fireflies {
                 (FrameInfo f) => Colors.White
             );
             var staticCaseOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Green);
-
-            var alternatingColor = new Functions.Timing.Looping(TimeSpan.FromSeconds(30));
-            var colors = new Color[] { Colors.Red, Colors.Green, Colors.Blue, Colors.White };
-
-            var colorBlendOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => {
-                var progress = alternatingColor.Loop(f) * colors.Length;
-                var colorIndex = (int)progress % colors.Length;
-
-                var colorA = colors[colorIndex];
-                var colorB = colors[(colorIndex + 1) % colors.Length];
-
-                return Functions.Color.Helpers.crossfade(colorA, colorB, progress - colorIndex);
-            });
-
+            
             var blankOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Black);
 
             var alignOrchestrator = new Orchestrators.AlignTest();
@@ -122,9 +114,24 @@ namespace Fireflies {
                 B = 255
             });
 
+            screenOrchestrator = new Orchestrators.ScreenColor(screen);
+
+            var alternatingColor = new Functions.Timing.Looping(TimeSpan.FromSeconds(60));
+            var colors = new Color[] { Colors.Red, Colors.Green, Colors.Blue, Colors.White };
+            ColorFunction colorBlend = (FrameInfo f) => {
+                var progress = alternatingColor.Loop(f) * colors.Length;
+                var colorIndex = (int)progress % colors.Length;
+
+                var colorA = colors[colorIndex];
+                var colorB = colors[(colorIndex + 1) % colors.Length];
+
+                return Functions.Color.Helpers.crossfade(colorA, colorB, progress - colorIndex);
+            };
+            var pulsingColorOrchestrator = new Orchestrators.PulsingColors(colorBlend, 23);
+
             return new Orchestrators.Splitter(
-                new int[] { 23, 44, 30 },
-                new IOrchestrator[] { colorBlendOrchestrator, blankOrchestrator, blankOrchestrator }
+                new int[] { 23, 40, 34 },
+                new IOrchestrator[] { pulsingColorOrchestrator, blankOrchestrator, screenOrchestrator }
             );
         }
 

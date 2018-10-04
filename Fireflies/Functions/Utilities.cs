@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fireflies.Frames;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,14 @@ namespace Fireflies.Functions {
 
         public static double wrapExtend(double value, double min, double max, double extendWith) {
             return wrap(value * (1 + extendWith) - extendWith / 2, min, max);
+        }
+
+        public static TimingFunction withEasing(TimingFunction timing, EasingFunction easing) {
+            return (FrameInfo f) => easing(timing(f));
+        }
+
+        public static double stretch(double value, double offset, double lengthFactor) {
+            return value * lengthFactor + offset;
         }
     }
 }

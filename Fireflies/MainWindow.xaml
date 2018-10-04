@@ -14,7 +14,7 @@
                Width="50" Height="40" 
                VerticalAlignment="Top" HorizontalAlignment="Left"></Label>
 
-        <local:LEDStripRenderer x:Name="screenLEDRenderer" PixelCount="30" LEDsPerPixel="3" PixelOffset="-15" Margin="60,44,338,187"></local:LEDStripRenderer>
+        <local:LEDStripRenderer x:Name="screenLEDRenderer" PixelCount="34" LEDsPerPixel="3" PixelOffset="-15" Margin="60,44,338,187"></local:LEDStripRenderer>
         <local:LEDStripRenderer x:Name="caseLEDRenderer" PixelCount="23" LEDsPerPixel="3" PixelOffset="-16" Margin="524,248,35,32"></local:LEDStripRenderer>
 
         <local:ScreenCapturePreview x:Name="capturePreview" HorizontalAlignment="Left" Height="196" VerticalAlignment="Top" Width="364" Margin="88,70,0,0" />

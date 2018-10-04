@@ -5,8 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Fireflies.Frames {
-    
-
     public delegate void FrameUpdate();
 
     public interface IFrameSource {

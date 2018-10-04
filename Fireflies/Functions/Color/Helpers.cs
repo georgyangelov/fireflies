@@ -21,5 +21,9 @@ namespace Fireflies.Functions.Color {
                 A = 255
             };
         }
+
+        public static System.Windows.Media.Color darken(System.Windows.Media.Color color, float factor) {
+            return crossfade(color, Colors.Black, factor);
+        }
     }
 }

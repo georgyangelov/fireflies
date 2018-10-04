@@ -8,6 +8,7 @@ using Fireflies.Frames;
 using System.Windows.Media;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using Fireflies.Corrections;
 
 namespace Fireflies.Orchestrators {
     public class ScreenColor : IOrchestrator {
@@ -23,7 +24,14 @@ namespace Fireflies.Orchestrators {
             int height = screen.ScreenHeight;
             
             for (int i = 0; i < length; i++) {
-                leds[i + offset] = Functions.Color.Helpers.crossfade(leds[i + offset], getColorForPixel(i, length, frame, width, height), 0.2);
+                leds[i + offset] = BrightnessCap.correct(
+                    Functions.Color.Helpers.crossfade(
+                        leds[i + offset], 
+                        getColorForPixel(i, length, frame, width, height), 
+                        0.4
+                    ), 
+                    0.6f
+                );
             }
         }
 
@@ -65,8 +73,8 @@ namespace Fireflies.Orchestrators {
             byte r, g, b;
             int rSum = 0, gSum = 0, bSum = 0, pixelCount = 0;
 
-            for (int y = area.Top; y < area.Bottom; y += 2) {
-                for (int x = area.Left; x < area.Right; x += 2) {
+            for (int y = area.Top; y < area.Bottom; y += 3) {
+                for (int x = area.Left; x < area.Right; x += 3) {
                     pixelOffset = y * screenWidth * 4 + x * 4;
                     r = pixels[pixelOffset + 2];
                     g = pixels[pixelOffset + 1];
