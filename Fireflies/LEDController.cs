@@ -2,6 +2,8 @@
 using Fireflies.Core;
 using Fireflies.Corrections;
 using Fireflies.Frames;
+using Fireflies.Functions;
+using Fireflies.Functions.Color;
 using Fireflies.Orchestrators;
 using Fireflies.Transport;
 using System;
@@ -29,12 +31,12 @@ namespace Fireflies {
 
         public event FrameUpdate FrameReady;
 
-        private ScreenCapturer screen = new ScreenCapturer(0, 0);
-        private Orchestrators.ScreenColor screenOrchestrator;
+        //private ScreenCapturer screen = new ScreenCapturer(0, 0);
+        //private Orchestrators.ScreenColor screenOrchestrator;
 
-        public byte[] CurrentScreenFrame {
-            get => screen.CurrentFrame;
-        }
+        //public byte[] CurrentScreenFrame {
+        //    get => screen.CurrentFrame;
+        //}
 
         // public System.Drawing.Bitmap TestFrame {
         //    get => gpuScreenOrchestrator.getBitmap();
@@ -65,8 +67,8 @@ namespace Fireflies {
                     )
             );
 
-            var captureTask = new Task(() => screen.Capture(), TaskCreationOptions.LongRunning);
-            captureTask.Start();
+            //var captureTask = new Task(() => screen.Capture(), TaskCreationOptions.LongRunning);
+            //captureTask.Start();
 
             frameSource = new FramerateLimitSource(transport, 65);
             // frameSource = new RenderingTargetSource();
@@ -79,16 +81,19 @@ namespace Fireflies {
         private IOrchestrator buildSlidingRainbowOrchestrator() {
             float lineLength = 1f;
 
+            Functional.ProgressFunction progressFn = Fn.looping(
+                //Fn.speedProgress(
+                //    Fn.cpuUsageSpeedup(10f),
+                //    TimeSpan.FromMilliseconds(30000),
+                //    0.98f
+                //)
+                Fn.linearProgress(TimeSpan.FromMilliseconds(30000))
+            );
+
             return new VectorOrchestrator(
-                Fn.looping(
-                    //Fn.speedProgress(
-                    //    Fn.cpuUsageSpeedup(10f),
-                    //    TimeSpan.FromMilliseconds(30000),
-                    //    0.98f
-                    //)
-                    Fn.linearProgress(TimeSpan.FromMilliseconds(30000))
-                ),
-                (scene, progress) => {
+                (scene, frame) => {
+                    var progress = progressFn(frame);
+
                     scene.pushTransform(new Scene.Transform() {
                         offset = progress,
                         scale = 1
@@ -122,18 +127,27 @@ namespace Fireflies {
         private IOrchestrator buildSlidingColorOrchestrator() {
             float lineLength = 0.5f;
 
+            Functional.ProgressFunction velocityFn = Fn.alternating(Fn.linearProgress(TimeSpan.FromMilliseconds(10000)), 1, -1);
+            Functional.ProgressFunction progressFn = Fn.looping(
+                Fn.speedProgress(
+                    (frame) => velocityFn(frame) * 2,
+                    TimeSpan.FromMilliseconds(1000)
+                )
+            );
+
             return new VectorOrchestrator(
-                Fn.looping(
-                    Fn.linearProgress(TimeSpan.FromMilliseconds(3000))
-                ),
-                (scene, progress) => {
+                (scene, frame) => {
+                    var velocity = velocityFn(frame);
+                    var progress = progressFn(frame);
+                    var darkening = 1 - Utilities.stretch(Math.Abs(velocity), 0f, 1f, 0.5f, 1f);
+
                     scene.pushTransform(new Scene.Transform() {
                         offset = progress,
                         scale = 1
                     });
 
-                    scene.drawFeatheredLine(0, lineLength, Colors.Green, lineLength / 3, lineLength / 3);
-                    scene.drawFeatheredLine(0.5f, 0.5f + lineLength, Colors.DarkRed, lineLength / 3, lineLength / 3);
+                    scene.drawFeatheredLine(0, lineLength, Helpers.darken(Colors.Green, darkening), lineLength / 3, lineLength / 3);
+                    scene.drawFeatheredLine(0.5f, 0.5f + lineLength, Helpers.darken(Colors.DarkGreen, darkening), lineLength / 3, lineLength / 3);
 
                     scene.popTransform();
                 }
@@ -144,11 +158,11 @@ namespace Fireflies {
             //var slidingColor = buildSlidingRainbowOrchestrator();
             var slidingColor = buildSlidingColorOrchestrator();
             var blank = new SolidColor((FrameInfo f) => Colors.Black);
-            screenOrchestrator = new Orchestrators.ScreenColor(screen);
+            //screenOrchestrator = new Orchestrators.ScreenColor(screen);
 
             return new Splitter(
                 new int[] { 23, 40, 34 },
-                new IOrchestrator[] { blank, blank, screenOrchestrator }
+                new IOrchestrator[] { blank, blank, slidingColor }
             );
         }
 
@@ -222,7 +236,7 @@ namespace Fireflies {
             transport.sendFrame(Pixels);
             fps.frameReady(frame);
 
-            screen.NextFrame();
+            //screen.NextFrame();
 
             FrameReady?.Invoke();
         }

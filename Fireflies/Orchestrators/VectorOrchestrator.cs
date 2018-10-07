@@ -8,13 +8,11 @@ using Fireflies.Frames;
 
 namespace Fireflies.Orchestrators {
     class VectorOrchestrator : IOrchestrator {
-        public delegate void Painter(Scene.Scene1D scene, float progress);
-
-        private Core.Functional.ProgressFunction progressFn;
+        public delegate void Painter(Scene.Scene1D scene, FrameInfo frame);
+        
         private Painter painter;
 
-        public VectorOrchestrator(Core.Functional.ProgressFunction progressFn, Painter painter) {
-            this.progressFn = progressFn;
+        public VectorOrchestrator(Painter painter) {
             this.painter = painter;
         }
 
@@ -25,7 +23,7 @@ namespace Fireflies.Orchestrators {
 
             Scene.Scene1D scene = new Scene.Scene1D(leds, offset, length);
 
-            painter(scene, progressFn(frame));
+            painter(scene, frame);
         }
     }
 }

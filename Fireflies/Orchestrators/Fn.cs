@@ -22,7 +22,7 @@ namespace Fireflies.Orchestrators {
 
         public delegate float SpeedAdjustmentFunction(FrameInfo frame);
 
-        public static Functional.ProgressFunction speedProgress(SpeedAdjustmentFunction speedFunction, TimeSpan unitMeasure, float speedSmoothing) {
+        public static Functional.ProgressFunction speedProgress(SpeedAdjustmentFunction speedFunction, TimeSpan unitMeasure, float speedSmoothing = 0f) {
             float progress = 0;
             float speed = 0;
 
@@ -49,6 +49,12 @@ namespace Fireflies.Orchestrators {
         public static Functional.ProgressFunction looping(Functional.ProgressFunction progressFunction) {
             return (frame) => {
                 return progressFunction(frame) % 1f;
+            };
+        }
+
+        public static Functional.ProgressFunction alternating(Functional.ProgressFunction progressFunction, float from, float to) {
+            return (frame) => {
+                return (1 - Math.Abs((progressFunction(frame) % 2f) - 1f)) * (to - from) + from;
             };
         }
 

@@ -175,13 +175,13 @@ namespace Fireflies.Scene {
         }
 
         private int pixelInScene(int index) {
-            int result = index % pixelsLength + pixelsOffset;
+            int result = index % pixelsLength;
 
             if (result < 0) {
                 result = result + pixelsLength;
             }
 
-            return result;
+            return result + pixelsOffset;
         }
 
         private void setPixel(int sceneIndex, Color color) {

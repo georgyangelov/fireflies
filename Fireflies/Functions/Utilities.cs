@@ -29,5 +29,11 @@ namespace Fireflies.Functions {
         public static double stretch(double value, double offset, double lengthFactor) {
             return value * lengthFactor + offset;
         }
+
+        public static float stretch(float value, float fromMin, float fromMax, float toMin, float toMax) {
+            float fraction = (value - fromMin) / (fromMax - fromMin);
+
+            return fraction * (toMax - toMin) + toMin;
+        }
     }
 }
