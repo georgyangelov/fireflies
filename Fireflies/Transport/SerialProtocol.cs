@@ -59,7 +59,6 @@ namespace Fireflies.Transport {
             serial.BaseStream.WriteByte(p.type);
             serial.BaseStream.Write(lengthBuffer, 0, sizeof(UInt16));
             serial.BaseStream.Write(p.data, 0, p.length);
-            serial.BaseStream.WriteByte(0xf0);
 
             receivedAck = false;
         }

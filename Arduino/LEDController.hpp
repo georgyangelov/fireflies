@@ -4,13 +4,12 @@
 #define COLOR_ORDER BRG
 
 class LEDController {
-	Timeout receiveDataTimeout;
 	Timeout receivePacketTimeout;
 	SerialProtocol protocol;
 	CRGB leds[PIXEL_COUNT];
 
 public:
-	LEDController() : receiveDataTimeout(1000), protocol(receiveDataTimeout), receivePacketTimeout(1000) {
+	LEDController() : receivePacketTimeout(1000) {
 	}
 
 	void setup() {
@@ -24,6 +23,12 @@ public:
 	}
 
 	void loop() {
+		if (receivePacketTimeout.timedOut()) {
+			receivePacketTimeout.reset();
+			protocol.reset();
+			turnOffLeds();
+		}
+
 		protocol.loop();
 
 		if (protocol.hasPacketReady()) {
@@ -43,9 +48,6 @@ public:
 			}
 
 			protocol.ackPacket();
-		} else if (protocol.hasTimedOut() || receivePacketTimeout.timedOut()) {
-			receivePacketTimeout.reset();
-			turnOffLeds();
 		}
 	}
 

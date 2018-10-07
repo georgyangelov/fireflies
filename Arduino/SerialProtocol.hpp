@@ -10,22 +10,15 @@ struct Packet {
 
 class SerialProtocol {
 	bool reading = false,
-		 timedOut = false,
 		 packetReady = false;
-
-	Timeout& receiveTimeout;
 
 	Packet packet;
 	uint16 lengthLeftToRead = 0;
 
 	const byte BEGIN_MARKER = 0xff,
-		       END_MARKER = 0xf0,
 		       ACK = 0x4b;
 
 public:
-	SerialProtocol(Timeout& _receiveTimeout) : receiveTimeout(_receiveTimeout) {
-	}
-
 	void setup() {
 		Serial.begin(250000);
 		Serial.setTimeout(500);
@@ -33,17 +26,13 @@ public:
 		while (!Serial);
 	}
 
+	void reset() {
+		reading = false;
+		packetReady = false;
+	}
+
 	void loop() {
-		if (reading && receiveTimeout.timedOut()) {
-			reading = false;
-			timedOut = true;
-			return;
-		}
-
-		// 4 = begin marker + type + length
-		if (!reading && Serial.available() >= 4) {
-			receiveTimeout.reset();
-
+		if (!reading && Serial.available() >= sizeof(BEGIN_MARKER) + sizeof(packet.type) + sizeof(packet.length)) {
 			// Read control byte and header
 			if (Serial.read() != BEGIN_MARKER) {
 				return;
@@ -59,30 +48,14 @@ public:
 				return;
 			}
 		} else if (reading && Serial.available()) {
-			receiveTimeout.reset();
-
 			// Read data
 			lengthLeftToRead -= Serial.readBytes(packet.data + packet.length - lengthLeftToRead, min(Serial.available(), lengthLeftToRead));
 
 			if (lengthLeftToRead == 0) {
 				reading = false;
-
-				// Read the final data marker
-				while (Serial.available() == 0);
-
-				if (Serial.read() == END_MARKER) {
-					packetReady = true;
-				}
+				packetReady = true;
 			}
 		}
-	}
-
-	bool hasTimedOut() {
-		bool timedOut = this->timedOut;
-
-		this->timedOut = false;
-
-		return timedOut;
 	}
 
 	bool hasPacketReady() {
@@ -96,6 +69,9 @@ public:
 	}
 
 	void ackPacket() {
-		Serial.write(ACK);
+		if (Serial.availableForWrite() >= sizeof(ACK)) {
+			// Writing without checking first may block the operation if there is noone to receive the data
+			Serial.write(ACK);
+		}
 	}
 };
