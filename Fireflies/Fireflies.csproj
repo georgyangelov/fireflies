@@ -81,6 +81,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Core\Functional.cs" />
+    <Compile Include="Core\Functions.cs" />
     <Compile Include="Corrections\BrightnessCap.cs" />
     <Compile Include="Corrections\BrightnessCorrection.cs" />
     <Compile Include="Corrections\GammaCorrection.cs" />
@@ -94,10 +96,13 @@
     <Compile Include="Functions\Color\Helpers.cs" />
     <Compile Include="LEDController.cs" />
     <Compile Include="Orchestrators\AlignTest.cs" />
+    <Compile Include="Orchestrators\Fn.cs" />
     <Compile Include="Orchestrators\GPUScreenColor.cs" />
     <Compile Include="Orchestrators\PulsingColors.cs" />
     <Compile Include="Orchestrators\ScreenColor.cs" />
     <Compile Include="Orchestrators\Splitter.cs" />
+    <Compile Include="Orchestrators\VectorOrchestrator.cs" />
+    <Compile Include="Scene\Scene1D.cs" />
     <Compile Include="Transport\Communicator.cs" />
     <Compile Include="Transport\SerialProtocol.cs" />
     <Compile Include="Functions\Color\Static.cs" />
@@ -116,7 +121,6 @@
     <Compile Include="Capture\ScreenCapturer.cs" />
     <Compile Include="Functions\Easing\Linear.cs" />
     <Compile Include="Functions\Easing\Polynomial.cs" />
-    <Compile Include="Functions\Functions.cs" />
     <Compile Include="Functions\Easing\Sine.cs" />
     <Compile Include="Controls\LEDStripRenderer.cs" />
     <Compile Include="MainWindow.xaml.cs">

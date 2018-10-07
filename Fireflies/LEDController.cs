@@ -1,6 +1,8 @@
 ﻿using Fireflies.Capture;
+using Fireflies.Core;
 using Fireflies.Corrections;
 using Fireflies.Frames;
+using Fireflies.Orchestrators;
 using Fireflies.Transport;
 using System;
 using System.Collections.Generic;
@@ -56,7 +58,7 @@ namespace Fireflies {
                     GammaCorrection.correct(
                         BrightnessCorrection.correct(
                             TemperatureCorrection.correct(c, correction),
-                            0.9
+                            0.6
                         ),
                         1.6f, 1.8f, 2.0f
                         //2.2f
@@ -66,7 +68,7 @@ namespace Fireflies {
             var captureTask = new Task(() => screen.Capture(), TaskCreationOptions.LongRunning);
             captureTask.Start();
 
-            frameSource = new FramerateLimitSource(transport, 60);
+            frameSource = new FramerateLimitSource(transport, 65);
             // frameSource = new RenderingTargetSource();
             frameSource.FrameRequest += handleFrame;
 
@@ -74,67 +76,143 @@ namespace Fireflies {
             frameSource.Start();
         }
 
-        private IOrchestrator buildOrchestrator() {
-            EasingFunction easing = new Functions.Easing.Polynomial(2).EaseInOut;
-            TimingFunction screenTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Loop;
-            TimingFunction caseTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Alternating;
+        private IOrchestrator buildSlidingRainbowOrchestrator() {
+            float lineLength = 1f;
 
-            //  var screenOrchestrator = new Orchestrators.SlidingColor(
-            //      (FrameInfo f) => screenTiming(f),
-            //      (FrameInfo f) => Color.Multiply(Colors.Green, 0.2f),
-            //      (FrameInfo f) => Colors.Green
-            //  );
+            return new VectorOrchestrator(
+                Fn.looping(
+                    //Fn.speedProgress(
+                    //    Fn.cpuUsageSpeedup(10f),
+                    //    TimeSpan.FromMilliseconds(30000),
+                    //    0.98f
+                    //)
+                    Fn.linearProgress(TimeSpan.FromMilliseconds(30000))
+                ),
+                (scene, progress) => {
+                    scene.pushTransform(new Scene.Transform() {
+                        offset = progress,
+                        scale = 1
+                    });
 
-            var caseOrchestrator = new Orchestrators.SlidingColor(
-                new Functions.Timing.Speed((FrameInfo f) => 3 * easing(caseTiming(f)) + 0.3).Function,
-                (FrameInfo f) => Colors.Blue,
-                (FrameInfo f) => Colors.White
-            );
-            var staticCaseOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Green);
-            
-            var blankOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Black);
+                    float p1 = 0, 
+                          p2 = lineLength / 3, 
+                          p3 = 2 * lineLength / 3,
+                          p4 = lineLength;
+                    
+                    scene.drawLine(p1, p2, new Scene.Gradient() {
+                        from = Colors.Blue,
+                        to = Colors.Green
+                    });
 
-            var alignOrchestrator = new Orchestrators.AlignTest();
-            var screenColorOrchestrator = new Orchestrators.ScreenColor(screen);
-            var greenOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
-                A = 255,
-                R = 0x65,
-                G = 0xff,
-                B = 0x00
-            });
-            var blueOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
-                A = 255,
-                R = 30,
-                G = 144,
-                B = 255
-            });
-            var grayOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
-                A = 255,
-                R = 255,
-                G = 255,
-                B = 255
-            });
+                    scene.drawLine(p2, p3, new Scene.Gradient() {
+                        from = Colors.Green,
+                        to = Colors.Red
+                    });
 
-            screenOrchestrator = new Orchestrators.ScreenColor(screen);
+                    scene.drawLine(p3, p4, new Scene.Gradient() {
+                        from = Colors.Red,
+                        to = Colors.Blue
+                    });
 
-            var alternatingColor = new Functions.Timing.Looping(TimeSpan.FromSeconds(60));
-            var colors = new Color[] { Colors.Red, Colors.Green, Colors.Blue, Colors.White };
-            ColorFunction colorBlend = (FrameInfo f) => {
-                var progress = alternatingColor.Loop(f) * colors.Length;
-                var colorIndex = (int)progress % colors.Length;
-
-                var colorA = colors[colorIndex];
-                var colorB = colors[(colorIndex + 1) % colors.Length];
-
-                return Functions.Color.Helpers.crossfade(colorA, colorB, progress - colorIndex);
-            };
-            var pulsingColorOrchestrator = new Orchestrators.PulsingColors(colorBlend, 34);
-
-            return new Orchestrators.Splitter(
-                new int[] { 23, 40, 34 },
-                new IOrchestrator[] { pulsingColorOrchestrator, blankOrchestrator, pulsingColorOrchestrator }
+                    scene.popTransform();
+                }
             );
         }
+
+        private IOrchestrator buildSlidingColorOrchestrator() {
+            float lineLength = 0.5f;
+
+            return new VectorOrchestrator(
+                Fn.looping(
+                    Fn.linearProgress(TimeSpan.FromMilliseconds(3000))
+                ),
+                (scene, progress) => {
+                    scene.pushTransform(new Scene.Transform() {
+                        offset = progress,
+                        scale = 1
+                    });
+
+                    scene.drawFeatheredLine(0, lineLength, Colors.Green, lineLength / 3, lineLength / 3);
+                    scene.drawFeatheredLine(0.5f, 0.5f + lineLength, Colors.DarkRed, lineLength / 3, lineLength / 3);
+
+                    scene.popTransform();
+                }
+            );
+        }
+
+        private IOrchestrator buildOrchestrator() {
+            //var slidingColor = buildSlidingRainbowOrchestrator();
+            var slidingColor = buildSlidingColorOrchestrator();
+            var blank = new SolidColor((FrameInfo f) => Colors.Black);
+            screenOrchestrator = new Orchestrators.ScreenColor(screen);
+
+            return new Splitter(
+                new int[] { 23, 40, 34 },
+                new IOrchestrator[] { blank, blank, screenOrchestrator }
+            );
+        }
+
+        //private IOrchestrator buildOrchestrator() {
+        //    EasingFunction easing = new Functions.Easing.Polynomial(2).EaseInOut;
+        //    TimingFunction screenTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Loop;
+        //    TimingFunction caseTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Alternating;
+
+        //    //  var screenOrchestrator = new Orchestrators.SlidingColor(
+        //    //      (FrameInfo f) => screenTiming(f),
+        //    //      (FrameInfo f) => Color.Multiply(Colors.Green, 0.2f),
+        //    //      (FrameInfo f) => Colors.Green
+        //    //  );
+
+        //    var caseOrchestrator = new Orchestrators.SlidingColor(
+        //        new Functions.Timing.Speed((FrameInfo f) => 3 * easing(caseTiming(f)) + 0.3).Function,
+        //        (FrameInfo f) => Colors.Blue,
+        //        (FrameInfo f) => Colors.White
+        //    );
+        //    var staticCaseOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Green);
+
+        //    var blankOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Black);
+
+        //    var alignOrchestrator = new Orchestrators.AlignTest();
+        //    var screenColorOrchestrator = new Orchestrators.ScreenColor(screen);
+        //    var greenOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
+        //        A = 255,
+        //        R = 0x65,
+        //        G = 0xff,
+        //        B = 0x00
+        //    });
+        //    var blueOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
+        //        A = 255,
+        //        R = 30,
+        //        G = 144,
+        //        B = 255
+        //    });
+        //    var grayOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
+        //        A = 255,
+        //        R = 255,
+        //        G = 255,
+        //        B = 255
+        //    });
+
+        //    screenOrchestrator = new Orchestrators.ScreenColor(screen);
+
+        //    var alternatingColor = new Functions.Timing.Looping(TimeSpan.FromSeconds(60));
+        //    var colors = new Color[] { Colors.Red, Colors.Green, Colors.Blue, Colors.White };
+        //    ColorFunction colorBlend = (FrameInfo f) => {
+        //        var progress = alternatingColor.Loop(f) * colors.Length;
+        //        var colorIndex = (int)progress % colors.Length;
+
+        //        var colorA = colors[colorIndex];
+        //        var colorB = colors[(colorIndex + 1) % colors.Length];
+
+        //        return Functions.Color.Helpers.crossfade(colorA, colorB, progress - colorIndex);
+        //    };
+        //    var pulsingColorOrchestrator = new Orchestrators.PulsingColors(colorBlend, 34);
+
+        //    return new Orchestrators.Splitter(
+        //        new int[] { 23, 40, 34 },
+        //        new IOrchestrator[] { pulsingColorOrchestrator, blankOrchestrator, pulsingColorOrchestrator }
+        //    );
+        //}
 
         private void handleFrame() {
             FrameInfo frame = frameStopwatch.NewFrame();
