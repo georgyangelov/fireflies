@@ -104,6 +104,7 @@
     <Compile Include="Orchestrators\ScreenColor.cs" />
     <Compile Include="Orchestrators\Splitter.cs" />
     <Compile Include="Orchestrators\VectorOrchestrator.cs" />
+    <Compile Include="PredefinedOrchestrators.cs" />
     <Compile Include="Scene\Scene1D.cs" />
     <Compile Include="Transport\Communicator.cs" />
     <Compile Include="Transport\KeyboardController.cs" />

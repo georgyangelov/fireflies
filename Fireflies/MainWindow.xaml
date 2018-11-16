@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Fireflies.Controls"
         mc:Ignorable="d"
-        Title="Fireflies" Height="505" Width="819">
-    <Grid Background="Black">
+        Title="Fireflies" Height="505" Width="1157" ResizeMode="NoResize">
+    <Grid Background="Black" Margin="0,0,334,0">
         <Label x:Name="fpsLabel" 
                Content="0"
                FontSize="20"
@@ -18,5 +18,14 @@
         <local:LEDStripRenderer x:Name="caseLEDRenderer" PixelCount="23" LEDsPerPixel="3" PixelOffset="-16" Margin="524,248,35,32"></local:LEDStripRenderer>
 
         <local:ScreenCapturePreview x:Name="capturePreview" HorizontalAlignment="Left" Height="196" VerticalAlignment="Top" Width="364" Margin="88,70,0,0" />
+
+        <Grid Height="474" Margin="825,0,-331,0" Width="321" HorizontalAlignment="Right">
+            <Label Content="Screen" Margin="8,12,221,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="92"/>
+            <Label Content="Case" Margin="8,50,221,0" VerticalAlignment="Top" HorizontalContentAlignment="Right"/>
+            <Label Content="Keyboard" Margin="8,88,221,0" VerticalAlignment="Top" HorizontalContentAlignment="Right"/>
+            <ComboBox x:Name="screenDropdown" Margin="115,14,10,0" VerticalAlignment="Top"/>
+            <ComboBox x:Name="caseDropdown" Margin="115,52,10,0" VerticalAlignment="Top"/>
+            <ComboBox x:Name="keyboardDropdown" Margin="115,90,10,0" VerticalAlignment="Top"/>
+        </Grid>
     </Grid>
 </Window>

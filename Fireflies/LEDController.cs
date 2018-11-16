@@ -23,7 +23,32 @@ namespace Fireflies {
         public Color[] KeyboardPixels { get; private set; }
 
         private IOrchestrator ledOrchestrator;
-        private IOrchestrator keyboardOrchestrator;
+
+        private IOrchestrator _screenOrchestrator = PredefinedOrchestrators.buildDisabled();
+        public IOrchestrator ScreenOrchestrator {
+            get { return _screenOrchestrator; }
+            set {
+                _screenOrchestrator = value;
+
+                ledOrchestrator = buildLEDOrchestrator();
+            }
+        }
+
+        private IOrchestrator _caseOrchestrator = PredefinedOrchestrators.buildDisabled();
+        public IOrchestrator CaseOrchestrator {
+            get { return _caseOrchestrator;  }
+            set {
+                _caseOrchestrator = value;
+
+                ledOrchestrator = buildLEDOrchestrator();
+            }
+        }
+
+        private IOrchestrator _keyboardOrchestrator = PredefinedOrchestrators.buildDisabled();
+        public IOrchestrator KeyboardOrchestrator {
+            get { return _keyboardOrchestrator; }
+            set { _keyboardOrchestrator = value; }
+        }
 
         private FPSCounter fps = new FPSCounter();
         private Communicator transport;
@@ -59,7 +84,7 @@ namespace Fireflies {
             initializePixelsTo(LEDPixels, Colors.Black);
 
             ledOrchestrator = buildLEDOrchestrator();
-            keyboardOrchestrator = buildKeyboardOrchestrator();
+            KeyboardOrchestrator = buildKeyboardOrchestrator();
 
             Color correction = new Color {
                 R = 255, // 255
@@ -230,13 +255,13 @@ namespace Fireflies {
         }
 
         private IOrchestrator buildLEDOrchestrator() {
-            var slidingColor = buildFadingColorOrchestrator();
+            //var slidingColor = buildFadingColorOrchestrator();
             var blank = new SolidColor((FrameInfo f) => Colors.Black);
             //screenOrchestrator = new Orchestrators.ScreenColor(screen);
 
             return new Splitter(
                 new int[] { 23, 40, 34 },
-                new IOrchestrator[] { blank, blank, slidingColor }
+                new IOrchestrator[] { CaseOrchestrator, blank, ScreenOrchestrator }
             );
         }
 
@@ -250,7 +275,7 @@ namespace Fireflies {
             ledOrchestrator.Update(LEDPixels, 0, LEDPixels.Length, frame);
             transport.sendFrame(LEDPixels);
 
-            keyboardOrchestrator.Update(KeyboardPixels, 0, KeyboardPixels.Length, frame);
+            KeyboardOrchestrator.Update(KeyboardPixels, 0, KeyboardPixels.Length, frame);
             keyboard.setPixels(KeyboardPixels, 0, KeyboardPixels.Length);
 
             fps.frameReady(frame);
