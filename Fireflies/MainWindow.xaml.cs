@@ -33,8 +33,8 @@ namespace Fireflies
 
         private void handleFrame() {
             Dispatcher.InvokeAsync(() => {
-                caseLEDRenderer.Update(controller.Pixels, 0, 23);
-                screenLEDRenderer.Update(controller.Pixels, 63, 34);
+                caseLEDRenderer.Update(controller.LEDPixels, 0, 23);
+                screenLEDRenderer.Update(controller.LEDPixels, 63, 34);
 
                 
 

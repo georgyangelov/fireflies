@@ -17,9 +17,13 @@ using System.Windows.Media;
 namespace Fireflies {
     public class LEDController {
         private const int pixelCount = 97;
+        private int keyboardPixelCount;
 
-        public Color[] Pixels { get; private set; }
-        private IOrchestrator orchestrator;
+        public Color[] LEDPixels { get; private set; }
+        public Color[] KeyboardPixels { get; private set; }
+
+        private IOrchestrator ledOrchestrator;
+        private IOrchestrator keyboardOrchestrator;
 
         private FPSCounter fps = new FPSCounter();
         private Communicator transport;
@@ -42,11 +46,20 @@ namespace Fireflies {
         //    get => gpuScreenOrchestrator.getBitmap();
         // }
 
-        public LEDController(SerialPort serialPort) {
-            Pixels = new Color[pixelCount];
-            initializePixelsTo(Colors.Black);
+        private KeyboardController keyboard;
 
-            orchestrator = buildOrchestrator();
+        public LEDController(SerialPort serialPort) {
+            keyboard = new KeyboardController();
+            initializeKeyboard();
+
+            KeyboardPixels = new Color[keyboardPixelCount];
+            initializePixelsTo(KeyboardPixels, Colors.Black);
+
+            LEDPixels = new Color[pixelCount];
+            initializePixelsTo(LEDPixels, Colors.Black);
+
+            ledOrchestrator = buildLEDOrchestrator();
+            keyboardOrchestrator = buildKeyboardOrchestrator();
 
             Color correction = new Color {
                 R = 255, // 255
@@ -78,6 +91,68 @@ namespace Fireflies {
             frameSource.Start();
         }
 
+        private void initializeKeyboard() {
+            var devices = keyboard.connectedDevices();
+
+            devices.ForEach(connectedDevice => {
+                Console.WriteLine("Found device: " + connectedDevice.friendlyName);
+            });
+
+            var device = devices.First();
+
+            keyboard.openDevice(device);
+            
+            keyboardPixelCount = keyboard.getPixelCount();
+
+            keyboard.enableTimerSending();
+        }
+
+        private IOrchestrator buildFadingColorOrchestrator() {
+            Color[] colors = {
+                Colors.Orange,
+                Colors.LightGreen,
+                Colors.LightBlue,
+                Colors.Yellow,
+                Colors.Magenta
+            };
+
+            Functional.ProgressFunction progressFn = Fn.linearProgress(TimeSpan.FromMilliseconds(60000));
+
+            return new VectorOrchestrator((scene, frame) => {
+                var progress = progressFn(frame);
+
+                scene.drawLine(0, 1, Helpers.crossfade(colors, progress));
+            });
+        }
+
+        private IOrchestrator buildSimpleSlidingColorOrchestrator(bool reverse = false) {
+            float lineLength = 0.2f;
+
+            Functional.ProgressFunction velocityFn = Fn.alternating(Fn.linearProgress(TimeSpan.FromMilliseconds(10000)), 1, -1);
+            Functional.ProgressFunction progressFn = Fn.looping(
+                Fn.speedProgress(
+                    (frame) => velocityFn(frame) * 1f,
+                    TimeSpan.FromMilliseconds(2000)
+                )
+            );
+
+            return new VectorOrchestrator((scene, frame) => {
+                var velocity = velocityFn(frame);
+                var progress = progressFn(frame);
+
+                var crossfadeFactor = Math.Abs(velocity);
+
+                scene.pushTransform(new Scene.Transform() {
+                    offset = reverse ? -progress : progress,
+                    scale = 1
+                });
+
+                scene.drawFeatheredLine(0, lineLength, Helpers.crossfade(Colors.Green, Colors.Red, crossfadeFactor), lineLength / 2, lineLength / 2);
+
+                scene.popTransform();
+            });
+        }
+
         private IOrchestrator buildSlidingRainbowOrchestrator() {
             float lineLength = 1f;
 
@@ -87,7 +162,7 @@ namespace Fireflies {
                 //    TimeSpan.FromMilliseconds(30000),
                 //    0.98f
                 //)
-                Fn.linearProgress(TimeSpan.FromMilliseconds(30000))
+                Fn.linearProgress(TimeSpan.FromMilliseconds(10000))
             );
 
             return new VectorOrchestrator(
@@ -154,9 +229,8 @@ namespace Fireflies {
             );
         }
 
-        private IOrchestrator buildOrchestrator() {
-            //var slidingColor = buildSlidingRainbowOrchestrator();
-            var slidingColor = buildSlidingColorOrchestrator();
+        private IOrchestrator buildLEDOrchestrator() {
+            var slidingColor = buildFadingColorOrchestrator();
             var blank = new SolidColor((FrameInfo f) => Colors.Black);
             //screenOrchestrator = new Orchestrators.ScreenColor(screen);
 
@@ -166,74 +240,19 @@ namespace Fireflies {
             );
         }
 
-        //private IOrchestrator buildOrchestrator() {
-        //    EasingFunction easing = new Functions.Easing.Polynomial(2).EaseInOut;
-        //    TimingFunction screenTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Loop;
-        //    TimingFunction caseTiming = new Functions.Timing.Looping(new TimeSpan(0, 0, 7)).Alternating;
-
-        //    //  var screenOrchestrator = new Orchestrators.SlidingColor(
-        //    //      (FrameInfo f) => screenTiming(f),
-        //    //      (FrameInfo f) => Color.Multiply(Colors.Green, 0.2f),
-        //    //      (FrameInfo f) => Colors.Green
-        //    //  );
-
-        //    var caseOrchestrator = new Orchestrators.SlidingColor(
-        //        new Functions.Timing.Speed((FrameInfo f) => 3 * easing(caseTiming(f)) + 0.3).Function,
-        //        (FrameInfo f) => Colors.Blue,
-        //        (FrameInfo f) => Colors.White
-        //    );
-        //    var staticCaseOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Green);
-
-        //    var blankOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => Colors.Black);
-
-        //    var alignOrchestrator = new Orchestrators.AlignTest();
-        //    var screenColorOrchestrator = new Orchestrators.ScreenColor(screen);
-        //    var greenOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
-        //        A = 255,
-        //        R = 0x65,
-        //        G = 0xff,
-        //        B = 0x00
-        //    });
-        //    var blueOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
-        //        A = 255,
-        //        R = 30,
-        //        G = 144,
-        //        B = 255
-        //    });
-        //    var grayOrchestrator = new Orchestrators.SolidColor((FrameInfo f) => new Color {
-        //        A = 255,
-        //        R = 255,
-        //        G = 255,
-        //        B = 255
-        //    });
-
-        //    screenOrchestrator = new Orchestrators.ScreenColor(screen);
-
-        //    var alternatingColor = new Functions.Timing.Looping(TimeSpan.FromSeconds(60));
-        //    var colors = new Color[] { Colors.Red, Colors.Green, Colors.Blue, Colors.White };
-        //    ColorFunction colorBlend = (FrameInfo f) => {
-        //        var progress = alternatingColor.Loop(f) * colors.Length;
-        //        var colorIndex = (int)progress % colors.Length;
-
-        //        var colorA = colors[colorIndex];
-        //        var colorB = colors[(colorIndex + 1) % colors.Length];
-
-        //        return Functions.Color.Helpers.crossfade(colorA, colorB, progress - colorIndex);
-        //    };
-        //    var pulsingColorOrchestrator = new Orchestrators.PulsingColors(colorBlend, 34);
-
-        //    return new Orchestrators.Splitter(
-        //        new int[] { 23, 40, 34 },
-        //        new IOrchestrator[] { pulsingColorOrchestrator, blankOrchestrator, pulsingColorOrchestrator }
-        //    );
-        //}
+        private IOrchestrator buildKeyboardOrchestrator() {
+            return buildFadingColorOrchestrator();
+        }
 
         private void handleFrame() {
             FrameInfo frame = frameStopwatch.NewFrame();
 
-            orchestrator.Update(Pixels, 0, Pixels.Length, frame);
+            ledOrchestrator.Update(LEDPixels, 0, LEDPixels.Length, frame);
+            transport.sendFrame(LEDPixels);
 
-            transport.sendFrame(Pixels);
+            keyboardOrchestrator.Update(KeyboardPixels, 0, KeyboardPixels.Length, frame);
+            keyboard.setPixels(KeyboardPixels, 0, KeyboardPixels.Length);
+
             fps.frameReady(frame);
 
             //screen.NextFrame();
@@ -241,9 +260,9 @@ namespace Fireflies {
             FrameReady?.Invoke();
         }
 
-        private void initializePixelsTo(Color color) {
-            for (int i = 0; i < Pixels.Length; i++) {
-                Pixels[i] = color;
+        private void initializePixelsTo(Color[] pixels, Color color) {
+            for (int i = 0; i < pixels.Length; i++) {
+                pixels[i] = color;
             }
         }
     }
