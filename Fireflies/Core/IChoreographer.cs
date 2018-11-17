@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace Fireflies {
-    public interface IOrchestrator {
+    public interface IChoreographer {
         void Update(Color[] leds, int offset, int length, FrameInfo frame);
     }
 }

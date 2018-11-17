@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fireflies.Frames {
-    public class FramerateLimitSource : IFrameSource {
+    public class FramerateLimiterSource : IFrameSource {
         private IFrameSource source;
         private FrameStopwatch stopwatch = new FrameStopwatch();
 
@@ -17,7 +17,7 @@ namespace Fireflies.Frames {
             get => 1000 / Limit;
         }
 
-        public FramerateLimitSource(IFrameSource source, int limit) {
+        public FramerateLimiterSource(IFrameSource source, int limit) {
             this.source = source;
             Limit = limit;
         }

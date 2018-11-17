@@ -9,29 +9,28 @@ using System.Windows.Media;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using Fireflies.Corrections;
+using Fireflies.Library;
 
 namespace Fireflies.Orchestrators {
-    public class ScreenColor : IOrchestrator {
+    public class ScreenColor : IChoreographer {
         private ScreenCapturer screen;
+        private ColorCorrectionFunction correction = ColorCorrectionFn.limitBrightness(0.6f);
 
         public ScreenColor(ScreenCapturer screenCapturer) {
             screen = screenCapturer;
         }
 
-        void IOrchestrator.Update(Color[] leds, int offset, int length, FrameInfo timing) {
+        void IChoreographer.Update(Color[] leds, int offset, int length, FrameInfo timing) {
             byte[] frame = screen.CurrentFrame;
             int width = screen.ScreenWidth;
             int height = screen.ScreenHeight;
             
             for (int i = 0; i < length; i++) {
-                leds[i + offset] = BrightnessCap.correct(
-                    Functions.Color.Helpers.crossfade(
-                        leds[i + offset], 
-                        getColorForPixel(i, length, frame, width, height), 
-                        0.4
-                    ), 
-                    0.6f
-                );
+                leds[i + offset] = correction(ColorFn.crossfade(
+                    leds[i + offset], 
+                    getColorForPixel(i, length, frame, width, height), 
+                    0.4f
+                ));
             }
         }
 

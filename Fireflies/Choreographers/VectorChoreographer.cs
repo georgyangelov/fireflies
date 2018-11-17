@@ -7,16 +7,16 @@ using System.Windows.Media;
 using Fireflies.Frames;
 
 namespace Fireflies.Orchestrators {
-    class VectorOrchestrator : IOrchestrator {
+    class VectorChoreographer : IChoreographer {
         public delegate void Painter(Scene.Scene1D scene, FrameInfo frame);
         
         private Painter painter;
 
-        public VectorOrchestrator(Painter painter) {
+        public VectorChoreographer(Painter painter) {
             this.painter = painter;
         }
 
-        void IOrchestrator.Update(Color[] leds, int offset, int length, FrameInfo frame) {
+        void IChoreographer.Update(Color[] leds, int offset, int length, FrameInfo frame) {
             for (int i = offset; i < offset + length; i++) {
                 leds[i] = Colors.Black;
             }

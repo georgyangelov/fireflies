@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace Fireflies.Orchestrators {
-    class RandomColor : IOrchestrator {
+    class RandomColor : IChoreographer {
         private Random random = new Random();
 
         public void Update(Color[] leds, int offset, int length, FrameInfo frame) {

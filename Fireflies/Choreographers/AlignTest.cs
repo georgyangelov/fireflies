@@ -7,8 +7,8 @@ using System.Windows.Media;
 using Fireflies.Frames;
 
 namespace Fireflies.Orchestrators {
-    public class AlignTest : IOrchestrator {
-        void IOrchestrator.Update(Color[] leds, int offset, int length, FrameInfo frame) {
+    public class AlignTest : IChoreographer {
+        void IChoreographer.Update(Color[] leds, int offset, int length, FrameInfo frame) {
             leds[offset] = new Color {
                 A = 255,
                 R = 255,

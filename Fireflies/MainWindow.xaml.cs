@@ -7,6 +7,7 @@ using Fireflies.Corrections;
 using Fireflies.Transport;
 using Fireflies.Frames;
 using System.Collections.Generic;
+using Fireflies.Library;
 
 namespace Fireflies
 {
@@ -17,10 +18,12 @@ namespace Fireflies
     {
         private static LEDController controller = new LEDController(new SerialPort("COM3", 250000));
 
-        private Dictionary<string, IOrchestrator> orchestrators = new Dictionary<string, IOrchestrator>() {
-            { "Disabled", PredefinedOrchestrators.buildDisabled() },
-            { "Changing Colors", PredefinedOrchestrators.buildChangingColors() },
-            { "Simple Sliding Color", PredefinedOrchestrators.buildSimpleSlidingColor() }
+        private Dictionary<string, IChoreographer> orchestrators = new Dictionary<string, IChoreographer>() {
+            { "Disabled", Library.Orchestrators.black() },
+            { "Changing Colors", Library.Orchestrators.changingColors() },
+            { "Simple Sliding Color (Green)", Library.Orchestrators.simpleSlidingColor(Colors.Green, ProgressFn.linear(TimeSpan.FromMilliseconds(10000))) },
+            { "Sliding Color with velocity", Library.Orchestrators.slidingColorWithVelocity() },
+            { "Rainbow", Library.Orchestrators.rainbow() }
         };
         
         public MainWindow()
@@ -73,8 +76,6 @@ namespace Fireflies
             Dispatcher.InvokeAsync(() => {
                 caseLEDRenderer.Update(controller.LEDPixels, 0, 23);
                 screenLEDRenderer.Update(controller.LEDPixels, 63, 34);
-
-                
 
                 fpsLabel.Content = Math.Round(controller.CurrentFPS);
             });

@@ -1,9 +1,7 @@
 ﻿using Fireflies.Capture;
-using Fireflies.Core;
 using Fireflies.Corrections;
 using Fireflies.Frames;
-using Fireflies.Functions;
-using Fireflies.Functions.Color;
+using Fireflies.Library;
 using Fireflies.Orchestrators;
 using Fireflies.Transport;
 using System;
@@ -22,10 +20,10 @@ namespace Fireflies {
         public Color[] LEDPixels { get; private set; }
         public Color[] KeyboardPixels { get; private set; }
 
-        private IOrchestrator ledOrchestrator;
+        private IChoreographer ledOrchestrator;
 
-        private IOrchestrator _screenOrchestrator = PredefinedOrchestrators.buildDisabled();
-        public IOrchestrator ScreenOrchestrator {
+        private IChoreographer _screenOrchestrator = Library.Orchestrators.black();
+        public IChoreographer ScreenOrchestrator {
             get { return _screenOrchestrator; }
             set {
                 _screenOrchestrator = value;
@@ -34,8 +32,8 @@ namespace Fireflies {
             }
         }
 
-        private IOrchestrator _caseOrchestrator = PredefinedOrchestrators.buildDisabled();
-        public IOrchestrator CaseOrchestrator {
+        private IChoreographer _caseOrchestrator = Library.Orchestrators.black();
+        public IChoreographer CaseOrchestrator {
             get { return _caseOrchestrator;  }
             set {
                 _caseOrchestrator = value;
@@ -44,8 +42,8 @@ namespace Fireflies {
             }
         }
 
-        private IOrchestrator _keyboardOrchestrator = PredefinedOrchestrators.buildDisabled();
-        public IOrchestrator KeyboardOrchestrator {
+        private IChoreographer _keyboardOrchestrator = Library.Orchestrators.black();
+        public IChoreographer KeyboardOrchestrator {
             get { return _keyboardOrchestrator; }
             set { _keyboardOrchestrator = value; }
         }
@@ -84,31 +82,23 @@ namespace Fireflies {
             initializePixelsTo(LEDPixels, Colors.Black);
 
             ledOrchestrator = buildLEDOrchestrator();
-            KeyboardOrchestrator = buildKeyboardOrchestrator();
 
-            Color correction = new Color {
-                R = 255, // 255
-                G = 250, // 255
-                B = 170  // 180
-            };
-
-            transport = new Communicator(
-                new SerialProtocol(serialPort),
-                (Color c) =>
-                    GammaCorrection.correct(
-                        BrightnessCorrection.correct(
-                            TemperatureCorrection.correct(c, correction),
-                            0.6
-                        ),
-                        1.6f, 1.8f, 2.0f
-                        //2.2f
-                    )
+            ColorCorrectionFunction colorCorrectionForLEDs = ColorCorrectionFn.compose(
+                ColorCorrectionFn.correctTemperature(new Color {
+                    R = 255, // 255
+                    G = 250, // 255
+                    B = 170  // 180
+                }),
+                ColorCorrectionFn.scaleBrightness(0.6f),
+                ColorCorrectionFn.correctGamma(1.6f, 1.8f, 2.0f)
             );
 
+            transport = new Communicator(new SerialProtocol(serialPort), colorCorrectionForLEDs);
+            
             //var captureTask = new Task(() => screen.Capture(), TaskCreationOptions.LongRunning);
             //captureTask.Start();
 
-            frameSource = new FramerateLimitSource(transport, 65);
+            frameSource = new FramerateLimiterSource(transport, 65);
             // frameSource = new RenderingTargetSource();
             frameSource.FrameRequest += handleFrame;
 
@@ -132,141 +122,11 @@ namespace Fireflies {
             keyboard.enableTimerSending();
         }
 
-        private IOrchestrator buildFadingColorOrchestrator() {
-            Color[] colors = {
-                Colors.Orange,
-                Colors.LightGreen,
-                Colors.LightBlue,
-                Colors.Yellow,
-                Colors.Magenta
-            };
-
-            Functional.ProgressFunction progressFn = Fn.linearProgress(TimeSpan.FromMilliseconds(60000));
-
-            return new VectorOrchestrator((scene, frame) => {
-                var progress = progressFn(frame);
-
-                scene.drawLine(0, 1, Helpers.crossfade(colors, progress));
-            });
-        }
-
-        private IOrchestrator buildSimpleSlidingColorOrchestrator(bool reverse = false) {
-            float lineLength = 0.2f;
-
-            Functional.ProgressFunction velocityFn = Fn.alternating(Fn.linearProgress(TimeSpan.FromMilliseconds(10000)), 1, -1);
-            Functional.ProgressFunction progressFn = Fn.looping(
-                Fn.speedProgress(
-                    (frame) => velocityFn(frame) * 1f,
-                    TimeSpan.FromMilliseconds(2000)
-                )
-            );
-
-            return new VectorOrchestrator((scene, frame) => {
-                var velocity = velocityFn(frame);
-                var progress = progressFn(frame);
-
-                var crossfadeFactor = Math.Abs(velocity);
-
-                scene.pushTransform(new Scene.Transform() {
-                    offset = reverse ? -progress : progress,
-                    scale = 1
-                });
-
-                scene.drawFeatheredLine(0, lineLength, Helpers.crossfade(Colors.Green, Colors.Red, crossfadeFactor), lineLength / 2, lineLength / 2);
-
-                scene.popTransform();
-            });
-        }
-
-        private IOrchestrator buildSlidingRainbowOrchestrator() {
-            float lineLength = 1f;
-
-            Functional.ProgressFunction progressFn = Fn.looping(
-                //Fn.speedProgress(
-                //    Fn.cpuUsageSpeedup(10f),
-                //    TimeSpan.FromMilliseconds(30000),
-                //    0.98f
-                //)
-                Fn.linearProgress(TimeSpan.FromMilliseconds(10000))
-            );
-
-            return new VectorOrchestrator(
-                (scene, frame) => {
-                    var progress = progressFn(frame);
-
-                    scene.pushTransform(new Scene.Transform() {
-                        offset = progress,
-                        scale = 1
-                    });
-
-                    float p1 = 0, 
-                          p2 = lineLength / 3, 
-                          p3 = 2 * lineLength / 3,
-                          p4 = lineLength;
-                    
-                    scene.drawLine(p1, p2, new Scene.Gradient() {
-                        from = Colors.Blue,
-                        to = Colors.Green
-                    });
-
-                    scene.drawLine(p2, p3, new Scene.Gradient() {
-                        from = Colors.Green,
-                        to = Colors.Red
-                    });
-
-                    scene.drawLine(p3, p4, new Scene.Gradient() {
-                        from = Colors.Red,
-                        to = Colors.Blue
-                    });
-
-                    scene.popTransform();
-                }
-            );
-        }
-
-        private IOrchestrator buildSlidingColorOrchestrator() {
-            float lineLength = 0.5f;
-
-            Functional.ProgressFunction velocityFn = Fn.alternating(Fn.linearProgress(TimeSpan.FromMilliseconds(10000)), 1, -1);
-            Functional.ProgressFunction progressFn = Fn.looping(
-                Fn.speedProgress(
-                    (frame) => velocityFn(frame) * 2,
-                    TimeSpan.FromMilliseconds(1000)
-                )
-            );
-
-            return new VectorOrchestrator(
-                (scene, frame) => {
-                    var velocity = velocityFn(frame);
-                    var progress = progressFn(frame);
-                    var darkening = 1 - Utilities.stretch(Math.Abs(velocity), 0f, 1f, 0.5f, 1f);
-
-                    scene.pushTransform(new Scene.Transform() {
-                        offset = progress,
-                        scale = 1
-                    });
-
-                    scene.drawFeatheredLine(0, lineLength, Helpers.darken(Colors.Green, darkening), lineLength / 3, lineLength / 3);
-                    scene.drawFeatheredLine(0.5f, 0.5f + lineLength, Helpers.darken(Colors.DarkGreen, darkening), lineLength / 3, lineLength / 3);
-
-                    scene.popTransform();
-                }
-            );
-        }
-
-        private IOrchestrator buildLEDOrchestrator() {
-            //var slidingColor = buildFadingColorOrchestrator();
-            var blank = new SolidColor((FrameInfo f) => Colors.Black);
-            //screenOrchestrator = new Orchestrators.ScreenColor(screen);
-
+        private IChoreographer buildLEDOrchestrator() {
             return new Splitter(
                 new int[] { 23, 40, 34 },
-                new IOrchestrator[] { CaseOrchestrator, blank, ScreenOrchestrator }
+                new IChoreographer[] { CaseOrchestrator, Library.Orchestrators.black(), ScreenOrchestrator }
             );
-        }
-
-        private IOrchestrator buildKeyboardOrchestrator() {
-            return buildFadingColorOrchestrator();
         }
 
         private void handleFrame() {

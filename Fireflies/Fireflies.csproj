@@ -83,37 +83,31 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Core\Functional.cs" />
     <Compile Include="Core\Functions.cs" />
-    <Compile Include="Corrections\BrightnessCap.cs" />
-    <Compile Include="Corrections\BrightnessCorrection.cs" />
-    <Compile Include="Corrections\GammaCorrection.cs" />
-    <Compile Include="Corrections\TemperatureCorrection.cs" />
-    <Compile Include="Corrections\HSLColor.cs" />
-    <Compile Include="Frames\FPSCounter.cs" />
-    <Compile Include="Frames\FrameStopwatch.cs" />
-    <Compile Include="Frames\FramerateLimitSource.cs" />
-    <Compile Include="Frames\RenderingTargetSource.cs" />
-    <Compile Include="Frames\IFrameSource.cs" />
-    <Compile Include="Functions\Color\Helpers.cs" />
+    <Compile Include="Core\HSLColor.cs" />
+    <Compile Include="FrameSources\FPSCounter.cs" />
+    <Compile Include="Core\FrameStopwatch.cs" />
+    <Compile Include="FrameSources\FramerateLimiterSource.cs" />
+    <Compile Include="FrameSources\RenderingTargetSource.cs" />
+    <Compile Include="Core\IFrameSource.cs" />
     <Compile Include="LEDController.cs" />
-    <Compile Include="Orchestrators\AlignTest.cs" />
-    <Compile Include="Orchestrators\Fn.cs" />
-    <Compile Include="Orchestrators\GPUScreenColor.cs" />
-    <Compile Include="Orchestrators\PulsingColors.cs" />
-    <Compile Include="Orchestrators\ScreenColor.cs" />
-    <Compile Include="Orchestrators\Splitter.cs" />
-    <Compile Include="Orchestrators\VectorOrchestrator.cs" />
-    <Compile Include="PredefinedOrchestrators.cs" />
+    <Compile Include="Library\ColorCorrectionFn.cs" />
+    <Compile Include="Library\ColorFn.cs" />
+    <Compile Include="Library\EasingFn.cs" />
+    <Compile Include="Library\NumberFn.cs" />
+    <Compile Include="Library\Orchestrators.cs" />
+    <Compile Include="Library\ProgressFn.cs" />
+    <Compile Include="Library\SpeedFn.cs" />
+    <Compile Include="Choreographers\AlignTest.cs" />
+    <Compile Include="Choreographers\Screen\GPUScreenColor.cs" />
+    <Compile Include="Choreographers\Screen\ScreenColor.cs" />
+    <Compile Include="Choreographers\Splitter.cs" />
+    <Compile Include="Choreographers\VectorChoreographer.cs" />
     <Compile Include="Scene\Scene1D.cs" />
-    <Compile Include="Transport\Communicator.cs" />
-    <Compile Include="Transport\KeyboardController.cs" />
-    <Compile Include="Transport\SerialProtocol.cs" />
-    <Compile Include="Functions\Color\Static.cs" />
-    <Compile Include="Functions\Timing\Speed.cs" />
-    <Compile Include="Functions\Timing\Looping.cs" />
-    <Compile Include="Functions\Utilities.cs" />
-    <Compile Include="Controls\ScreenCapturePreview.cs" />
+    <Compile Include="Transport\Arduino\Communicator.cs" />
+    <Compile Include="Transport\CreativeKeyboard\KeyboardController.cs" />
+    <Compile Include="Transport\Arduino\SerialProtocol.cs" />
+    <Compile Include="GUI\Controls\ScreenCapturePreview.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -122,22 +116,16 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Capture\ScreenCapturer.cs" />
-    <Compile Include="Functions\Easing\Linear.cs" />
-    <Compile Include="Functions\Easing\Polynomial.cs" />
-    <Compile Include="Functions\Easing\Sine.cs" />
-    <Compile Include="Controls\LEDStripRenderer.cs" />
+    <Compile Include="Choreographers\Screen\ScreenCapturer.cs" />
+    <Compile Include="GUI\Controls\LEDStripRenderer.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IOrchestrator.cs" />
-    <Compile Include="Orchestrators\FadeBlender.cs" />
-    <Compile Include="Orchestrators\RandomColor.cs" />
-    <Compile Include="Orchestrators\SlidingColor.cs" />
-    <Compile Include="Orchestrators\SolidColor.cs" />
+    <Compile Include="Core\IChoreographer.cs" />
+    <Compile Include="Choreographers\RandomColor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -166,6 +154,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="test.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Capture\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

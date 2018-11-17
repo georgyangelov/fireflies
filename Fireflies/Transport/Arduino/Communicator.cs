@@ -9,14 +9,12 @@ using System.Windows.Media;
 
 namespace Fireflies.Transport {
     public class Communicator : IFrameSource {
-        public delegate Color Correction(Color c);
-
         public event FrameUpdate FrameRequest;
 
-        private Correction colorCorrection;
+        private ColorCorrectionFunction colorCorrection;
         private SerialProtocol protocol;
 
-        public Communicator(SerialProtocol protocol, Correction colorCorrection) {
+        public Communicator(SerialProtocol protocol, ColorCorrectionFunction colorCorrection) {
             this.protocol = protocol;
             this.colorCorrection = colorCorrection;
         }

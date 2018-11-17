@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Fireflies.Controls"
         mc:Ignorable="d"
-        Title="Fireflies" Height="505" Width="1157" ResizeMode="NoResize">
+        Title="Fireflies" Height="505" Width="1157" ResizeMode="CanMinimize">
     <Grid Background="Black" Margin="0,0,334,0">
         <Label x:Name="fpsLabel" 
                Content="0"

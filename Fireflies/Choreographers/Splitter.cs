@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace Fireflies.Orchestrators {
-    public class Splitter : IOrchestrator {
+    public class Splitter : IChoreographer {
         private int[] segmentLengths;
-        private IOrchestrator[] orchestrators;
+        private IChoreographer[] orchestrators;
 
-        public Splitter(int[] segmentLengths, IOrchestrator[] orchestrators) {
+        public Splitter(int[] segmentLengths, IChoreographer[] orchestrators) {
             this.segmentLengths = segmentLengths;
             this.orchestrators = orchestrators;
         }

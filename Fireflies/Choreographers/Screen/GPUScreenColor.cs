@@ -19,7 +19,7 @@ using System.Drawing.Imaging;
 using SharpDX;
 
 namespace Fireflies.Orchestrators {
-    public class GPUScreenColor : IOrchestrator {
+    public class GPUScreenColor : IChoreographer {
         private ScreenCapturer screen;
 
         private int adapterIndex = 0, outputIndex = 0;
@@ -90,7 +90,7 @@ namespace Fireflies.Orchestrators {
             // TODO: Export the texture as bitmap and show it in the UI
         }
 
-        void IOrchestrator.Update(System.Windows.Media.Color[] leds, int offset, int length, FrameInfo frame) {
+        void IChoreographer.Update(System.Windows.Media.Color[] leds, int offset, int length, FrameInfo frame) {
             // byte[] frame = screen.CurrentFrame;
             // int width = screen.ScreenWidth;
             // int height = screen.ScreenHeight;
