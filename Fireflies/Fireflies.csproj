@@ -91,18 +91,15 @@
     <Compile Include="FrameSources\RenderingTargetSource.cs" />
     <Compile Include="Core\IFrameSource.cs" />
     <Compile Include="LEDController.cs" />
+    <Compile Include="Library\ChoreographyFn.cs" />
     <Compile Include="Library\ColorCorrectionFn.cs" />
     <Compile Include="Library\ColorFn.cs" />
     <Compile Include="Library\EasingFn.cs" />
     <Compile Include="Library\NumberFn.cs" />
-    <Compile Include="Library\Orchestrators.cs" />
     <Compile Include="Library\ProgressFn.cs" />
     <Compile Include="Library\SpeedFn.cs" />
-    <Compile Include="Choreographers\AlignTest.cs" />
     <Compile Include="Choreographers\Screen\GPUScreenColor.cs" />
     <Compile Include="Choreographers\Screen\ScreenColor.cs" />
-    <Compile Include="Choreographers\Splitter.cs" />
-    <Compile Include="Choreographers\VectorChoreographer.cs" />
     <Compile Include="Scene\Scene1D.cs" />
     <Compile Include="Transport\Arduino\Communicator.cs" />
     <Compile Include="Transport\CreativeKeyboard\KeyboardController.cs" />
@@ -125,7 +122,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\IChoreographer.cs" />
-    <Compile Include="Choreographers\RandomColor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

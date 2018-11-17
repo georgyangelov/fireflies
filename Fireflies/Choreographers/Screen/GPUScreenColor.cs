@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using Fireflies.Frames;
+using Fireflies.Core;
 using Fireflies.Capture;
 
 using SharpDX.DXGI;

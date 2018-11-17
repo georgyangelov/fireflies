@@ -17,13 +17,7 @@ namespace Fireflies.Orchestrators {
         }
 
         void IChoreographer.Update(Color[] leds, int offset, int length, FrameInfo frame) {
-            for (int i = offset; i < offset + length; i++) {
-                leds[i] = Colors.Black;
-            }
-
-            Scene.Scene1D scene = new Scene.Scene1D(leds, offset, length);
-
-            painter(scene, frame);
+            
         }
     }
 }

@@ -6,15 +6,10 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using Fireflies.Frames;
 
-namespace Fireflies.Orchestrators {
+namespace Fireflies.Choreographers {
     public class AlignTest : IChoreographer {
         void IChoreographer.Update(Color[] leds, int offset, int length, FrameInfo frame) {
-            leds[offset] = new Color {
-                A = 255,
-                R = 255,
-                G = 0,
-                B = 0
-            };
+            
         }
     }
 }

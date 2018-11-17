@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fireflies.Frames {
+namespace Fireflies.Core {
     public delegate void FrameUpdate();
 
     public interface IFrameSource {

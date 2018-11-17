@@ -1,11 +1,8 @@
-﻿using System;
+﻿using Fireflies.Core;
+using System;
 using System.IO.Ports;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using Fireflies.Corrections;
-using Fireflies.Transport;
-using Fireflies.Frames;
 using System.Collections.Generic;
 using Fireflies.Library;
 
@@ -18,12 +15,14 @@ namespace Fireflies
     {
         private static LEDController controller = new LEDController(new SerialPort("COM3", 250000));
 
-        private Dictionary<string, IChoreographer> orchestrators = new Dictionary<string, IChoreographer>() {
-            { "Disabled", Library.Orchestrators.black() },
-            { "Changing Colors", Library.Orchestrators.changingColors() },
-            { "Simple Sliding Color (Green)", Library.Orchestrators.simpleSlidingColor(Colors.Green, ProgressFn.linear(TimeSpan.FromMilliseconds(10000))) },
-            { "Sliding Color with velocity", Library.Orchestrators.slidingColorWithVelocity() },
-            { "Rainbow", Library.Orchestrators.rainbow() }
+        private Dictionary<string, ChoreographyFunction> orchestrators = new Dictionary<string, ChoreographyFunction>() {
+            { "Disabled", ChoreographyFn.black() },
+            { "Alignment Test", ChoreographyFn.alignmentTest() },
+            { "Random Colors", ChoreographyFn.randomColor() },
+            { "Changing Colors", ChoreographyFn.changingColors() },
+            { "Simple Sliding Color (Green)", ChoreographyFn.simpleSlidingColor(Colors.Green, ProgressFn.linear(TimeSpan.FromMilliseconds(10000))) },
+            { "Sliding Color with velocity", ChoreographyFn.slidingColorWithVelocity() },
+            { "Rainbow", ChoreographyFn.rainbow() },
         };
         
         public MainWindow()
@@ -52,19 +51,19 @@ namespace Fireflies
             screenDropdown.SelectionChanged += (target, e) => {
                 var orchestrator = orchestrators[(string)screenDropdown.SelectedItem];
 
-                controller.ScreenOrchestrator = orchestrator;
+                controller.ScreenChoreography = orchestrator;
             };
 
             caseDropdown.SelectionChanged += (target, e) => {
                 var orchestrator = orchestrators[(string)caseDropdown.SelectedItem];
 
-                controller.CaseOrchestrator = orchestrator;
+                controller.CaseChoreography = orchestrator;
             };
 
             keyboardDropdown.SelectionChanged += (target, e) => {
                 var orchestrator = orchestrators[(string)keyboardDropdown.SelectedItem];
 
-                controller.KeyboardOrchestrator = orchestrator;
+                controller.KeyboardChoreography = orchestrator;
             };
 
             screenDropdown.SelectedIndex = 0;

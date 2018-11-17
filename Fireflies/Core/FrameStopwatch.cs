@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fireflies.Frames {
+namespace Fireflies.Core {
     public struct FrameInfo {
         public TimeSpan frameTime;
         public TimeSpan totalTime;

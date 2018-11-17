@@ -1,5 +1,5 @@
 ﻿using Fireflies.Capture;
-using Fireflies.Corrections;
+using Fireflies.Core;
 using Fireflies.Frames;
 using Fireflies.Library;
 using Fireflies.Orchestrators;
@@ -20,32 +20,32 @@ namespace Fireflies {
         public Color[] LEDPixels { get; private set; }
         public Color[] KeyboardPixels { get; private set; }
 
-        private IChoreographer ledOrchestrator;
+        private ChoreographyFunction ledChoreography;
 
-        private IChoreographer _screenOrchestrator = Library.Orchestrators.black();
-        public IChoreographer ScreenOrchestrator {
-            get { return _screenOrchestrator; }
+        private ChoreographyFunction _screenChoreography = ChoreographyFn.black();
+        public ChoreographyFunction ScreenChoreography {
+            get { return _screenChoreography; }
             set {
-                _screenOrchestrator = value;
+                _screenChoreography = value;
 
-                ledOrchestrator = buildLEDOrchestrator();
+                ledChoreography = buildLEDChoreography();
             }
         }
 
-        private IChoreographer _caseOrchestrator = Library.Orchestrators.black();
-        public IChoreographer CaseOrchestrator {
-            get { return _caseOrchestrator;  }
+        private ChoreographyFunction _caseChoreography = ChoreographyFn.black();
+        public ChoreographyFunction CaseChoreography {
+            get { return _caseChoreography;  }
             set {
-                _caseOrchestrator = value;
+                _caseChoreography = value;
 
-                ledOrchestrator = buildLEDOrchestrator();
+                ledChoreography = buildLEDChoreography();
             }
         }
 
-        private IChoreographer _keyboardOrchestrator = Library.Orchestrators.black();
-        public IChoreographer KeyboardOrchestrator {
-            get { return _keyboardOrchestrator; }
-            set { _keyboardOrchestrator = value; }
+        private ChoreographyFunction _keyboardChoreography = ChoreographyFn.black();
+        public ChoreographyFunction KeyboardChoreography {
+            get { return _keyboardChoreography; }
+            set { _keyboardChoreography = value; }
         }
 
         private FPSCounter fps = new FPSCounter();
@@ -81,7 +81,7 @@ namespace Fireflies {
             LEDPixels = new Color[pixelCount];
             initializePixelsTo(LEDPixels, Colors.Black);
 
-            ledOrchestrator = buildLEDOrchestrator();
+            ledChoreography = buildLEDChoreography();
 
             ColorCorrectionFunction colorCorrectionForLEDs = ColorCorrectionFn.compose(
                 ColorCorrectionFn.correctTemperature(new Color {
@@ -122,20 +122,20 @@ namespace Fireflies {
             keyboard.enableTimerSending();
         }
 
-        private IChoreographer buildLEDOrchestrator() {
-            return new Splitter(
+        private ChoreographyFunction buildLEDChoreography() {
+            return ChoreographyFn.segment(
                 new int[] { 23, 40, 34 },
-                new IChoreographer[] { CaseOrchestrator, Library.Orchestrators.black(), ScreenOrchestrator }
+                new ChoreographyFunction[] { CaseChoreography, ChoreographyFn.black(), ScreenChoreography }
             );
         }
 
         private void handleFrame() {
             FrameInfo frame = frameStopwatch.NewFrame();
 
-            ledOrchestrator.Update(LEDPixels, 0, LEDPixels.Length, frame);
+            ledChoreography(LEDPixels, 0, LEDPixels.Length, frame);
             transport.sendFrame(LEDPixels);
 
-            KeyboardOrchestrator.Update(KeyboardPixels, 0, KeyboardPixels.Length, frame);
+            KeyboardChoreography(KeyboardPixels, 0, KeyboardPixels.Length, frame);
             keyboard.setPixels(KeyboardPixels, 0, KeyboardPixels.Length);
 
             fps.frameReady(frame);

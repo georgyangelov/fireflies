@@ -8,8 +8,8 @@ using Fireflies.Frames;
 using System.Windows.Media;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using Fireflies.Corrections;
 using Fireflies.Library;
+using Fireflies.Core;
 
 namespace Fireflies.Orchestrators {
     public class ScreenColor : IChoreographer {

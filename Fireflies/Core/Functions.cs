@@ -2,7 +2,9 @@
 using System;
 using System.Windows.Media;
 
-namespace Fireflies {
+namespace Fireflies.Core {
+    public delegate void ChoreographyFunction(Color[] leds, int offset, int length, FrameInfo frame);
+
     // FrameInfo -> [0, +inf)
     public delegate float ProgressFunction(FrameInfo frame);
 
