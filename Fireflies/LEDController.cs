@@ -20,33 +20,14 @@ namespace Fireflies {
         public Color[] LEDPixels { get; private set; }
         public Color[] KeyboardPixels { get; private set; }
 
+        public ChoreographyFunction ScreenChoreography { get; set; } = ChoreographyFn.black();
+        public ChoreographyFunction CaseChoreography { get; set; } = ChoreographyFn.black();
+        public ChoreographyFunction KeyboardChoreography { get; set; } = ChoreographyFn.black();
+
         private ChoreographyFunction ledChoreography;
+        private ChoreographyFunction actualKeyboardChoreography;
 
-        private ChoreographyFunction _screenChoreography = ChoreographyFn.black();
-        public ChoreographyFunction ScreenChoreography {
-            get { return _screenChoreography; }
-            set {
-                _screenChoreography = value;
-
-                ledChoreography = buildLEDChoreography();
-            }
-        }
-
-        private ChoreographyFunction _caseChoreography = ChoreographyFn.black();
-        public ChoreographyFunction CaseChoreography {
-            get { return _caseChoreography;  }
-            set {
-                _caseChoreography = value;
-
-                ledChoreography = buildLEDChoreography();
-            }
-        }
-
-        private ChoreographyFunction _keyboardChoreography = ChoreographyFn.black();
-        public ChoreographyFunction KeyboardChoreography {
-            get { return _keyboardChoreography; }
-            set { _keyboardChoreography = value; }
-        }
+        public float Brightness { get; set; } = 1;
 
         private FPSCounter fps = new FPSCounter();
         private Communicator transport;
@@ -81,7 +62,22 @@ namespace Fireflies {
             LEDPixels = new Color[pixelCount];
             initializePixelsTo(LEDPixels, Colors.Black);
 
-            ledChoreography = buildLEDChoreography();
+            ledChoreography = ChoreographyFn.correction(
+                ChoreographyFn.segment(
+                    new int[] { 23, 40, 34 },
+                    new ChoreographyFunction[] {
+                        ChoreographyFn.dynamic(frame => CaseChoreography),
+                        ChoreographyFn.black(),
+                        ChoreographyFn.dynamic(frame => ScreenChoreography)
+                    }
+                ),
+                frame => ColorCorrectionFn.scaleBrightness(Brightness)
+            );
+
+            actualKeyboardChoreography = ChoreographyFn.correction(
+                ChoreographyFn.dynamic(frame => KeyboardChoreography),
+                frame => ColorCorrectionFn.scaleBrightness(Brightness)
+            );
 
             ColorCorrectionFunction colorCorrectionForLEDs = ColorCorrectionFn.compose(
                 ColorCorrectionFn.correctTemperature(new Color {
@@ -122,20 +118,13 @@ namespace Fireflies {
             keyboard.enableTimerSending();
         }
 
-        private ChoreographyFunction buildLEDChoreography() {
-            return ChoreographyFn.segment(
-                new int[] { 23, 40, 34 },
-                new ChoreographyFunction[] { CaseChoreography, ChoreographyFn.black(), ScreenChoreography }
-            );
-        }
-
         private void handleFrame() {
             FrameInfo frame = frameStopwatch.NewFrame();
 
             ledChoreography(LEDPixels, 0, LEDPixels.Length, frame);
             transport.sendFrame(LEDPixels);
 
-            KeyboardChoreography(KeyboardPixels, 0, KeyboardPixels.Length, frame);
+            actualKeyboardChoreography(KeyboardPixels, 0, KeyboardPixels.Length, frame);
             keyboard.setPixels(KeyboardPixels, 0, KeyboardPixels.Length);
 
             fps.frameReady(frame);

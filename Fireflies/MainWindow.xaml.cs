@@ -29,6 +29,7 @@ namespace Fireflies
         {
             InitializeComponent();
             initializeOrchestrators();
+            initializeBrightnessSlider();
 
             Loaded += (target, e) => {
                 controller.FrameReady += handleFrame;
@@ -71,8 +72,16 @@ namespace Fireflies
             keyboardDropdown.SelectedIndex = 0;
         }
 
+        private void initializeBrightnessSlider() {
+            brightnessSlider.ValueChanged += (target, e) => {
+                controller.Brightness = (float)brightnessSlider.Value;
+            };
+        }
+
         private void handleFrame() {
             Dispatcher.InvokeAsync(() => {
+                brightnessSlider.Value = controller.Brightness;
+
                 caseLEDRenderer.Update(controller.LEDPixels, 0, 23);
                 screenLEDRenderer.Update(controller.LEDPixels, 63, 34);
 

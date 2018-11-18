@@ -26,6 +26,8 @@
             <ComboBox x:Name="screenDropdown" Margin="115,14,10,0" VerticalAlignment="Top"/>
             <ComboBox x:Name="caseDropdown" Margin="115,52,10,0" VerticalAlignment="Top"/>
             <ComboBox x:Name="keyboardDropdown" Margin="115,90,10,0" VerticalAlignment="Top"/>
+            <Slider x:Name="brightnessSlider" HorizontalAlignment="Left" Margin="115,446,0,0" VerticalAlignment="Top" Width="196" Value="1" Minimum="0" Maximum="1"/>
+            <Label Content="Brightness" Margin="10,441,219,0" VerticalAlignment="Top" HorizontalContentAlignment="Right"/>
         </Grid>
     </Grid>
 </Window>

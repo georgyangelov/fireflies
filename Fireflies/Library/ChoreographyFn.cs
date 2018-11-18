@@ -36,6 +36,28 @@ namespace Fireflies.Library {
             };
         }
 
+        public static ChoreographyFunction correction(ChoreographyFunction choreographyFn, ColorCorrectionFunction correctionFn) {
+            return correction(choreographyFn, (frame) => correctionFn);
+        }
+
+        public static ChoreographyFunction correction(ChoreographyFunction choreographyFn, DynamicValue<ColorCorrectionFunction> correctionFn) {
+            return (pixels, offset, length, frame) => {
+                choreographyFn(pixels, offset, length, frame);
+
+                var correction = correctionFn(frame);
+
+                for (int i = 0; i < length; i++) {
+                    pixels[offset + i] = correction(pixels[offset + i]);
+                }
+            };
+        }
+
+        public static ChoreographyFunction dynamic(DynamicValue<ChoreographyFunction> choreographySupplier) {
+            return (pixels, offset, length, frame) => choreographySupplier(frame)(pixels, offset, length, frame);
+        }
+
+        // --------------------------------------------
+
         public static ChoreographyFunction randomColor() {
             Random random = new Random();
 

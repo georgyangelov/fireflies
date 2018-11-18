@@ -19,4 +19,7 @@ namespace Fireflies.Core {
 
     // Color -> Color
     public delegate Color ColorCorrectionFunction(Color color);
+
+    // FrameInfo -> T
+    public delegate T DynamicValue<T>(FrameInfo frame);
 }
