@@ -1,9 +1,12 @@
-﻿using Fireflies.Core;
+﻿using Fireflies.Capture;
+using Fireflies.Choreographers.Keyboard;
+using Fireflies.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Media;
 
 namespace Fireflies.Library {
@@ -52,8 +55,82 @@ namespace Fireflies.Library {
             };
         }
 
+        public static ChoreographyFunction darken(ChoreographyFunction choreographyFn, float factor) {
+            return correction(choreographyFn, (color) => ColorFn.darken(color, factor));
+        }
+
         public static ChoreographyFunction dynamic(DynamicValue<ChoreographyFunction> choreographySupplier) {
             return (pixels, offset, length, frame) => choreographySupplier(frame)(pixels, offset, length, frame);
+        }
+
+        public static ChoreographyFunction fadingOutToBlack(ChoreographyFunction choreographyFn, float factor) {
+            return (pixels, offset, length, frame) => {
+                for (int i = 0; i < length; i++) {
+                    pixels[offset + i] = ColorFn.darken(pixels[offset + i], frame.frameTime.Milliseconds * factor);
+                }
+
+                choreographyFn(pixels, offset, length, frame);
+            };
+        }
+
+        public static ChoreographyFunction fadingOut(ChoreographyFunction choreographyFn, float factor) {
+            return (pixels, offset, length, frame) => {
+                for (int i = 0; i < length; i++) {
+                    pixels[offset + i] = ColorFn.alphaen(pixels[offset + i], frame.frameTime.Milliseconds * factor);
+                }
+
+                choreographyFn(pixels, offset, length, frame);
+            };
+        }
+
+        public static ChoreographyFunction blend(ChoreographyFunction choreographyFn1, ChoreographyFunction choreographyFn2, ColorBlendingFunction blendFn) {
+            Color[] secondaryBuffer = null;
+
+            return (pixels, offset, length, frame) => {
+                if (secondaryBuffer == null || secondaryBuffer.Length < offset + length) {
+                    secondaryBuffer = new Color[offset + length];
+                }
+
+                choreographyFn1(pixels, offset, length, frame);
+                choreographyFn2(secondaryBuffer, offset, length, frame);
+
+                for (int i = 0; i < length; i++) {
+                    pixels[i] = blendFn(pixels[i], secondaryBuffer[i]);
+                }
+            };
+        }
+
+        public static ChoreographyFunction blendByAlpha(ChoreographyFunction choreographyFn1, ChoreographyFunction choreographyFn2) {
+            return blend(choreographyFn1, choreographyFn2, ColorFn.blendSecondWithAlpha);
+        }
+
+        public static ChoreographyFunction mask(ChoreographyFunction choreographyFn1, ChoreographyFunction choreographyFn2) {
+            return blend(choreographyFn1, choreographyFn2, ColorFn.mask);
+        }
+
+        public static ChoreographyFunction keyColor() {
+            var keyLogger = new KeyLogger();
+            var keyMapping = new KeyMapping();
+
+            return (pixels, offset, length, frame) => {
+                Keys key;
+
+                while (keyLogger.PressedKeys.TryDequeue(out key)) {
+                    var pixelIndexes = keyMapping.indexForKey(key);
+
+                    foreach (int pixelIndex in pixelIndexes) {
+                        if (pixelIndex >= length || pixelIndex < 0) {
+                            continue;
+                        }
+
+                        pixels[offset + pixelIndex] = Colors.Red;
+                    }
+                }
+            };
+        }
+
+        public static ChoreographyFunction keyTrails() {
+            return fadingOut(keyColor(), 0.001f);
         }
 
         // --------------------------------------------
@@ -82,9 +159,15 @@ namespace Fireflies.Library {
         }
 
         public static ChoreographyFunction black() {
-            return scene1D((scene, frame) => {
-                scene.drawLine(0, 1, Colors.Black);
-            });
+            return staticColor(Colors.Black);
+        }
+
+        public static ChoreographyFunction staticColor(Color color) {
+            return (pixels, offset, length, frame) => {
+                for (int i = 0; i < length; i++) {
+                    pixels[offset + i] = color;
+                }
+            };
         }
 
         public static ChoreographyFunction changingColors() {
@@ -165,6 +248,10 @@ namespace Fireflies.Library {
 
                 scene.popTransform();
             });
+        }
+
+        public static ChoreographyFunction keyTrailsWithBackground(ChoreographyFunction backgroundChoreographyFn) {
+            return blendByAlpha(backgroundChoreographyFn, keyTrails());
         }
     }
 }

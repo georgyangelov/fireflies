@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Collections.Generic;
 using Fireflies.Library;
+using Fireflies.Choreographers.Keyboard;
 
 namespace Fireflies
 {
@@ -23,6 +24,10 @@ namespace Fireflies
             { "Simple Sliding Color (Green)", ChoreographyFn.simpleSlidingColor(Colors.Green, ProgressFn.linear(TimeSpan.FromMilliseconds(10000))) },
             { "Sliding Color with velocity", ChoreographyFn.slidingColorWithVelocity() },
             { "Rainbow", ChoreographyFn.rainbow() },
+            { "Key Trails", ChoreographyFn.keyTrails() },
+            { "Key Trails With Changing color background", ChoreographyFn.keyTrailsWithBackground(ChoreographyFn.darken(ChoreographyFn.changingColors(), 0.5f)) },
+            { "Key Trails With White Background", ChoreographyFn.keyTrailsWithBackground(ChoreographyFn.staticColor(ColorFn.darken(Colors.White, 0.9f))) },
+            { "Key Trails With Mask on Rainbow", ChoreographyFn.mask(ChoreographyFn.rainbow(), ChoreographyFn.keyTrails()) }
         };
         
         public MainWindow()
@@ -30,7 +35,7 @@ namespace Fireflies
             InitializeComponent();
             initializeOrchestrators();
             initializeBrightnessSlider();
-
+            
             Loaded += (target, e) => {
                 controller.FrameReady += handleFrame;
             };
