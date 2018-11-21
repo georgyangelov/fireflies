@@ -7,7 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Media;
+using static Fireflies.Capture.KeyLogger;
 
 namespace Fireflies.Library {
     static class ChoreographyFn {
@@ -113,22 +115,22 @@ namespace Fireflies.Library {
             var keyMapping = new KeyMapping();
 
             return (pixels, offset, length, frame) => {
-                Keys key;
+                KeyAction key;
 
                 while (keyLogger.PressedKeys.TryDequeue(out key)) {
-                    var pixelIndexes = keyMapping.indexForKey(key);
+                    Console.WriteLine("Key: " + key.virtualKey + ", " + key.scanCode + ", " + key.extendedKey);
 
-                    foreach (int pixelIndex in pixelIndexes) {
-                        if (pixelIndex >= length || pixelIndex < 0) {
-                            continue;
-                        }
+                    var pixelIndex = keyMapping.indexForScanCode(key.scanCode);
 
-                        pixels[offset + pixelIndex] = Colors.Red;
+                    if (pixelIndex >= length || pixelIndex < 0) {
+                        continue;
                     }
+
+                    pixels[offset + pixelIndex] = Colors.Red;
                 }
             };
         }
-
+        
         public static ChoreographyFunction keyTrails() {
             return fadingOut(keyColor(), 0.001f);
         }

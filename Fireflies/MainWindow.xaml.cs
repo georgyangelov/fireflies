@@ -17,7 +17,7 @@ namespace Fireflies
         private static LEDController controller = new LEDController(new SerialPort("COM3", 250000));
 
         private Dictionary<string, ChoreographyFunction> orchestrators = new Dictionary<string, ChoreographyFunction>() {
-            { "Disabled", ChoreographyFn.black() },
+            { "Disabled", ChoreographyFn.staticColor(new Color { A = 0, R = 0, G = 0, B = 0 }) },
             { "Alignment Test", ChoreographyFn.alignmentTest() },
             { "Random Colors", ChoreographyFn.randomColor() },
             { "Changing Colors", ChoreographyFn.changingColors() },
