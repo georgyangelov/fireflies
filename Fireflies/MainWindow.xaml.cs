@@ -27,7 +27,8 @@ namespace Fireflies
             { "Key Trails", ChoreographyFn.keyTrails() },
             { "Key Trails With Changing color background", ChoreographyFn.keyTrailsWithBackground(ChoreographyFn.darken(ChoreographyFn.changingColors(), 0.5f)) },
             { "Key Trails With White Background", ChoreographyFn.keyTrailsWithBackground(ChoreographyFn.staticColor(ColorFn.darken(Colors.White, 0.9f))) },
-            { "Key Trails With Mask on Rainbow", ChoreographyFn.mask(ChoreographyFn.rainbow(), ChoreographyFn.keyTrails()) }
+            { "Key Trails With Mask on Rainbow", ChoreographyFn.mask(ChoreographyFn.rainbow(), ChoreographyFn.keyTrails()) },
+            { "Ambilight", ChoreographyFn.ambilight(new Capture.ScreenCapturer(0, 0)) }
         };
         
         public MainWindow()

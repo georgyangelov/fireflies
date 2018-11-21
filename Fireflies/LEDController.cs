@@ -39,17 +39,6 @@ namespace Fireflies {
 
         public event FrameUpdate FrameReady;
 
-        //private ScreenCapturer screen = new ScreenCapturer(0, 0);
-        //private Orchestrators.ScreenColor screenOrchestrator;
-
-        //public byte[] CurrentScreenFrame {
-        //    get => screen.CurrentFrame;
-        //}
-
-        // public System.Drawing.Bitmap TestFrame {
-        //    get => gpuScreenOrchestrator.getBitmap();
-        // }
-
         private KeyboardController keyboard;
 
         public LEDController(SerialPort serialPort) {
@@ -90,9 +79,6 @@ namespace Fireflies {
             );
 
             transport = new Communicator(new SerialProtocol(serialPort), colorCorrectionForLEDs);
-            
-            //var captureTask = new Task(() => screen.Capture(), TaskCreationOptions.LongRunning);
-            //captureTask.Start();
 
             frameSource = new FramerateLimiterSource(transport, 65);
             // frameSource = new RenderingTargetSource();
@@ -128,8 +114,6 @@ namespace Fireflies {
             keyboard.setPixels(KeyboardPixels, 0, KeyboardPixels.Length);
 
             fps.frameReady(frame);
-
-            //screen.NextFrame();
 
             FrameReady?.Invoke();
         }

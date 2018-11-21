@@ -26,6 +26,7 @@ namespace Fireflies.Capture {
         private Texture2D stagingTexture;
 
         private bool frameReady = false;
+        private volatile bool running = false;
 
         public byte[] CurrentFrame {
             get => buffer[2];
@@ -39,6 +40,31 @@ namespace Fireflies.Capture {
             this.outputIndex = outputIndex;
 
             initializeCapture();
+        }
+
+        public void Start() {
+            if (running) {
+                return;
+            }
+
+            running = true;
+            
+            using (var duplication = output.DuplicateOutput(device)) {
+                while (running) {
+                    try {
+                        CaptureFrame(duplication);
+                    } catch (SharpDXException e) {
+                        if (e.ResultCode.Code != SharpDX.DXGI.ResultCode.WaitTimeout.Result.Code) {
+                            throw e;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void Stop() {
+            running = false;
+            frameReady = false;
         }
 
         private void SwapBuffers(int i, int j) {
@@ -169,25 +195,6 @@ namespace Fireflies.Capture {
                 screenResource.Dispose();
                 outputDuplication.ReleaseFrame();
             }
-        }
-
-        public void Capture() {
-            using (var duplication = output.DuplicateOutput(device)) {
-                while (true) {
-                    try {
-                        CaptureFrame(duplication);
-                    } catch (SharpDXException e) {
-                        if (e.ResultCode.Code != SharpDX.DXGI.ResultCode.WaitTimeout.Result.Code) {
-                            throw e;
-                        }
-                    }
-                }
-            }
-
-            // currentFrame.Save("test.bmp");
-
-            // Display the texture using system associated viewer
-            // System.Diagnostics.Process.Start(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "test.bmp")));
         }
     }
 }

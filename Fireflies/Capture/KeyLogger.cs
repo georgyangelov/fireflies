@@ -38,7 +38,8 @@ namespace Fireflies.Capture {
             }
         }
 
-        private static IntPtr hookHandle = IntPtr.Zero;
+        private IntPtr hookHandle = IntPtr.Zero;
+        private bool ignoreEvents = true;
 
         public ConcurrentQueue<KeyAction> PressedKeys { get; private set; } = new ConcurrentQueue<KeyAction>();
 
@@ -50,17 +51,30 @@ namespace Fireflies.Capture {
             hookHandle = registerKeyPressHook(callback);
         }
 
-        void IDisposable.Dispose() {
-            UnhookWindowsHookEx(hookHandle);
+        public void Start() {
+            ignoreEvents = false;
+        }
+
+        public void Stop() {
+            lock(this) {
+                ignoreEvents = true;
+                PressedKeys = new ConcurrentQueue<KeyAction>();
+            }
+        }
+
+        public void Dispose() {
+            Stop();
         }
 
         // https://msdn.microsoft.com/en-us/library/ms644985(v=VS.85).aspx
         private IntPtr hookCallback(int nCode, IntPtr eventType, IntPtr lowLevelStructPtr) {
-            if (nCode >= 0 && (eventType == (IntPtr)WM_KEYDOWN || eventType == (IntPtr)WM_SYSKEYDOWN)) {
+            if (!ignoreEvents && nCode >= 0 && (eventType == (IntPtr)WM_KEYDOWN || eventType == (IntPtr)WM_SYSKEYDOWN)) {
                 KBDLLHOOKSTRUCT info = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lowLevelStructPtr);
                 KeyAction action = KeyAction.fromLowLevelStruct(info);
 
-                PressedKeys.Enqueue(action);
+                lock(this) {
+                    PressedKeys.Enqueue(action);
+                }
             }
 
             return CallNextHookEx(hookHandle, nCode, eventType, lowLevelStructPtr);

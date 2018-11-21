@@ -1,13 +1,11 @@
 ﻿using Fireflies.Capture;
 using Fireflies.Choreographers.Keyboard;
+using Fireflies.Choreographers.Screen;
 using Fireflies.Core;
+using Fireflies.Orchestrators;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Windows.Input;
 using System.Windows.Media;
 using static Fireflies.Capture.KeyLogger;
 
@@ -114,12 +112,10 @@ namespace Fireflies.Library {
             var keyLogger = new KeyLogger();
             var keyMapping = new KeyMapping();
 
-            return (pixels, offset, length, frame) => {
+            return stopWhenUnused((pixels, offset, length, frame) => {
                 KeyAction key;
 
                 while (keyLogger.PressedKeys.TryDequeue(out key)) {
-                    Console.WriteLine("Key: " + key.virtualKey + ", " + key.scanCode + ", " + key.extendedKey);
-
                     var pixelIndex = keyMapping.indexForScanCode(key.scanCode);
 
                     if (pixelIndex >= length || pixelIndex < 0) {
@@ -128,11 +124,54 @@ namespace Fireflies.Library {
 
                     pixels[offset + pixelIndex] = Colors.Red;
                 }
-            };
+            }, keyLogger.Start, keyLogger.Stop, TimeSpan.FromSeconds(2));
         }
         
         public static ChoreographyFunction keyTrails() {
             return fadingOut(keyColor(), 0.001f);
+        }
+
+        public delegate void LoadFunction();
+        public delegate void UnloadFunction();
+
+        public static ChoreographyFunction stopWhenUnused(ChoreographyFunction choreographyFn, LoadFunction loadFn, UnloadFunction unloadFn, TimeSpan inactiveTime) {
+            bool loaded = false;
+
+            Timer timer = null;
+            
+            timer = new Timer(_ => {
+                if (loaded) {
+                    loaded = false;
+                    unloadFn();
+                    timer.Change(Timeout.Infinite, Timeout.Infinite);
+                }
+            });
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+
+            return (pixels, offset, length, frame) => {
+                if (!loaded) {
+                    loadFn();
+                    loaded = true;
+                }
+                timer.Change((int)inactiveTime.TotalMilliseconds, Timeout.Infinite);
+
+                choreographyFn(pixels, offset, length, frame);
+            };
+        }
+
+        public static ChoreographyFunction ambilight(ScreenCapturer screenCapture) {
+            var screenColor = new ScreenColor(screenCapture);
+
+            Task captureTask;
+
+            return stopWhenUnused(screenColor.Update, () => {
+                Console.WriteLine("Started screen capture");
+                captureTask = new Task(screenCapture.Start, TaskCreationOptions.LongRunning);
+                captureTask.Start();
+            }, () => {
+                Console.WriteLine("Stopped screen capture");
+                screenCapture.Stop();
+            }, TimeSpan.FromSeconds(5));
         }
 
         // --------------------------------------------

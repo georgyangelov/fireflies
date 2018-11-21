@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 using Fireflies.Library;
 using Fireflies.Core;
 
-namespace Fireflies.Orchestrators {
+namespace Fireflies.Choreographers.Screen {
     public class ScreenColor : IChoreographer {
         private ScreenCapturer screen;
         private ColorCorrectionFunction correction = ColorCorrectionFn.limitBrightness(0.6f);
@@ -20,7 +20,9 @@ namespace Fireflies.Orchestrators {
             screen = screenCapturer;
         }
 
-        void IChoreographer.Update(Color[] leds, int offset, int length, FrameInfo timing) {
+        public void Update(Color[] leds, int offset, int length, FrameInfo timing) {
+            screen.NextFrame();
+
             byte[] frame = screen.CurrentFrame;
             int width = screen.ScreenWidth;
             int height = screen.ScreenHeight;
